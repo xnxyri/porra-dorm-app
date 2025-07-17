@@ -403,3 +403,9 @@ header h1 {
     margin: 0; /* Elimina el margen por defecto del h1 */
     font-size: 1.5em; /* Puedes ajustar el tamaño si lo ves muy grande */
 }
+
+.delete-match-btn {
+    background-color: #C62828; /* Rojo oscuro */
+    margin-top: 0 !important;
+    flex-grow: 1; /* Para que ocupe espacio junto al otro botón */
+}
