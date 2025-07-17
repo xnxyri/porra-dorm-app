@@ -90,6 +90,25 @@ async function cargarMemesAdmin() {
     });
 }
 
+async function handleDeleteMatch(event) {
+    const button = event.target;
+    const matchId = button.dataset.matchId;
+
+    if (!confirm(`¿Estás seguro de que quieres borrar el partido ${matchId}? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+
+    const response = await fetch(`/matches/${matchId}`, { method: 'DELETE' });
+
+    if (response.ok) {
+        showNotification(`Partido ${matchId} borrado con éxito.`, 'success');
+        button.closest('.upcoming-match-item').remove(); // Elimina el partido de la vista
+    } else {
+        const errorData = await response.json();
+        showNotification(`Error al borrar: ${errorData.detail}`, 'error');
+    }
+}
+
 async function handleCreateMeme(event) {
     event.preventDefault();
     const memeData = {
@@ -181,21 +200,10 @@ async function cargarPartidosPorJugar() {
             return;
         }
 
-        // La lista de goleadores del Real Madrid es siempre la misma
-        const goleadorOptions = plantillasEquipos["Real Madrid"].map(p => `<option value="${p}">${p}</option>`).join('');
-
         partidosPorJugar.forEach(partido => {
-            // --- LÓGICA CORREGIDA ---
-            // Para cada partido, buscamos las plantillas de los dos equipos implicados
-            const plantillaLocal = plantillasEquipos[partido.Equipo_Local] || [];
-            const plantillaVisitante = plantillasEquipos[partido.Equipo_Visitante] || [];
-
-            // Creamos una lista de opciones de MVP solo con los jugadores de esos dos equipos
-            const mvpOptions = [...plantillaLocal, ...plantillaVisitante].map(p => `<option value="${p}">${p}</option>`).join('');
-            // --- FIN DE LA LÓGICA CORREGIDA ---
-
             const matchDiv = document.createElement('div');
             matchDiv.className = 'upcoming-match-item';
+            // Añadimos un botón de Borrar al lado del de Finalizar
             matchDiv.innerHTML = `
                 <div class="match-details">
                     <strong>${partido.Equipo_Local} vs ${partido.Equipo_Visitante}</strong>
@@ -204,23 +212,18 @@ async function cargarPartidosPorJugar() {
                 <div class="result-form">
                     <input type="number" placeholder="G. Local" name="goles_local" required>
                     <input type="number" placeholder="G. Visit." name="goles_visitante" required>
-                    <select name="goleador_real" required>
-                        <option value="" disabled selected>Goleador Real</option>
-                        ${goleadorOptions}
-                    </select>
-                    <select name="mvp_real" required>
-                        <option value="" disabled selected>MVP Real</option>
-                        ${mvpOptions} {/* Usamos la lista de MVP específica para este partido */}
-                    </select>
+                    <select name="goleador_real" required><option value="" disabled selected>Goleador Real</option></select>
+                    <select name="mvp_real" required><option value="" disabled selected>MVP Real</option></select>
                     <button class="finalize-btn" data-match-id="${partido.ID_Partido}">Finalizar</button>
+                    <button class="delete-match-btn" data-match-id="${partido.ID_Partido}">Borrar</button>
                 </div>
             `;
             container.appendChild(matchDiv);
         });
 
-        document.querySelectorAll('.finalize-btn').forEach(button => {
-            button.addEventListener('click', handleFinalizeMatch);
-        });
+        // Asignamos los eventos a los nuevos botones
+        document.querySelectorAll('.finalize-btn').forEach(button => button.addEventListener('click', handleFinalizeMatch));
+        document.querySelectorAll('.delete-match-btn').forEach(button => button.addEventListener('click', handleDeleteMatch));
 
     } catch (error) {
         console.error("Error cargando partidos:", error);
