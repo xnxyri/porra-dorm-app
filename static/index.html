@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porra DORM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="notification-container"></div>
+    <header>
+        <div class="header-left">
+            <img src="https://media.api-sports.io/football/teams/541.png" alt="Escudo Real Madrid" id="header-crest">
+            <h1>PORRA DORM 25/26</h1>
+        </div>
+
+        <button id="theme-toggle">Cambiar Tema</button>
+    </header>
+    <section id="hero-carousel">
+        <img id="carousel-image" src="" alt="Meme de la porra">
+    </section>
+    <main>
+        <section id="predicciones">
+            <a href="/predicciones" class="button-link">¡Hacer mis Predicciones!</a>
+        </section>
+
+        <section id="clasificacion">
+            <h2>Clasificación</h2>
+            <div class="leaderboards-wrapper">
+                <div class="leaderboard-box">
+                    <h3>General</h3>
+                    <div id="general-leaderboard-container"></div>
+                </div>
+                <div class="leaderboard-box">
+                    <div class="monthly-header">
+                        <h3>Mensual</h3>
+                        <select id="month-selector"></select>
+                    </div>
+                    <div id="monthly-leaderboard-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultados">
+            <h2>Últimos Resultados</h2>
+            <div id="results-container">
+                </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Hecho con ❤️ para el DORM</p>
+    </footer>
+
+        <div id="factous-popup">
+        <div id="factous-text-bubble">
+            <p id="factous-text"></p>
+        </div>
+        <img id="factous-image" src="" alt="Factous">
+    </div>
+
+    <script src="/static/data.js"></script>
+    <script src="/static/app.js"></script>
+    
+</body>
+</html>

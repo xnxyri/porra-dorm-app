@@ -1,0 +1,1 @@
+ADMIN_PASSWORD = "Ancelottihdp@2025"

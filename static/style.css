@@ -1,0 +1,405 @@
+/* Regla global para que el padding y el borde no aumenten el tamaño de las cajas */
+* {
+    box-sizing: border-box;
+}
+
+/* :root define las variables para nuestro tema oscuro por defecto */
+:root {
+    --color-background: #121212;
+    --color-surface: #1e1e1e;
+    --color-primary: #bb86fc;
+    --color-text: #e0e0e0;
+    --color-border: #333;
+    --color-hover: #2a2a2a;
+}
+
+/* Cuando el body tenga la clase .light-mode, se usarán estas variables */
+body.light-mode {
+    --color-background: #EEEEEE; /* Tu color anti-flash white */
+    --color-surface: #ffffff;
+    --color-primary: #6200ee;
+    --color-text: #121212;
+    --color-border: #dddddd;
+    --color-hover: #f5f5f5;
+}
+
+/* Ahora, usamos las variables en nuestros estilos */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+main {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+header, main > section {
+    background-color: var(--color-surface);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+header {
+    max-width: 1280px; /* Ancho máximo para que coincida con el main */
+    margin: 0 auto 20px auto; /* Centrado y con margen inferior */
+    background-color: var(--color-surface);
+    border-radius: 8px;
+    padding: 5px 20px; /* Padding reducido para hacerlo menos alto */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#header-crest {
+    height: 40px; /* Altura del escudo */
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre el escudo y el texto */
+}
+
+h1, h2 {
+    color: var(--color-primary);
+}
+
+/* --- ESTILOS DE LA TABLA Y FORMULARIO --- */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+th {
+    background-color: var(--color-primary);
+    color: var(--color-background); /* Color de texto que contrasta con el primario */
+}
+
+tbody tr:hover {
+    background-color: var(--color-hover);
+}
+
+.match-prediction {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+input[type="number"], input[type="text"] {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 8px;
+    width: 150px;
+    text-align: center;
+}
+
+input[type="number"] {
+    width: 80px;
+}
+
+button, #theme-toggle {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    transition: transform 0.2s ease-in-out, background-color 0.3s;
+}
+
+button:hover, #theme-toggle:hover {
+    transform: scale(1.05);
+}
+
+/* --- ESTILOS PARA EL CARRUSEL --- */
+#hero-carousel {
+    width: 100%;
+    max-width: 1280px; /* Ancho máximo que ya teníamos */
+    height: 450px;      /* Altura fija que propones */
+    margin: 0 auto 20px auto;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000; /* Fondo negro por si la imagen no carga */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Esta es la magia: la imagen cubre el espacio sin deformarse */
+}
+
+.partidazo-label {
+    font-weight: bold;
+    color: var(--color-primary);
+    font-size: 1.1em;
+}
+.match-info {
+    font-size: 0.9em;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.button-link {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: transform 0.2s ease-in-out;
+}
+
+.button-link:hover {
+    transform: scale(1.05);
+}
+
+/* Oculta las flechas en los campos de número para Chrome, Safari, Edge, etc. */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+.user-input-container {
+    margin-bottom: 20px;
+}
+
+#discord-username {
+    width: 300px; /* Un poco más ancho para que quepa el nombre */
+}
+
+select {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 8px;
+    /* Le damos un ancho flexible que crece, pero no más de 250px */
+    flex-grow: 1;
+    max-width: 250px;
+    text-align: center;
+}
+
+.match-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* Espacio entre escudos y texto */
+}
+
+.team-crest {
+    width: 40px;
+    height: 40px;
+}
+
+/* --- ESTILOS DE NOTIFICACIÓN --- */
+#notification-container {
+    position: fixed; /* Se queda fijo en la pantalla */
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Truco para centrarlo perfectamente */
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: bold;
+    z-index: 1000; /* Para que esté por encima de todo */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s, visibility 0.5s;
+}
+
+#notification-container.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+#notification-container.success {
+    background-color: #2E7D32; /* Verde oscuro para éxito */
+}
+
+#notification-container.error {
+    background-color: #C62828; /* Rojo oscuro para error */
+}
+
+.leaderboards-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+.leaderboard-box {
+    flex: 1;
+}
+.monthly-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#month-selector {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 5px;
+}
+
+#admin-panel-section {
+    /* Propiedades de layout que ya teníamos */
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+
+    /* Propiedades para quitar el fondo de la caja contenedora */
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+.admin-column {
+    flex: 1;
+    background-color: rgba(0,0,0,0.2);
+    padding: 20px;
+    border-radius: 8px;
+}
+.upcoming-match-item {
+    border-bottom: 1px solid var(--color-border);
+    padding: 15px 0;
+    margin-bottom: 15px;
+}
+.match-details {
+    margin-bottom: 10px;
+}
+.result-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.result-form input {
+    flex-grow: 1;
+    width: 100px; /* Ancho base para los inputs de resultado */
+}
+.result-form button {
+    margin-top: 0;
+    flex-basis: 100%; /* El botón ocupa toda la línea */
+}
+
+/* --- AJUSTES DE ALINEACIÓN --- */
+
+/* Alinea el h3 "General" a la derecha */
+.leaderboard-box:first-child h3 {
+    text-align: left;
+    padding-right: 15px; /* Un poco de espacio para que no se pegue al borde */
+}
+
+/* Alinea los nombres de usuario (la segunda columna de la tabla) a la derecha */
+tbody tr td:nth-child(2) {
+    text-align: left;
+}
+
+/* --- ESTILOS DE FACTOUS --- */
+#factous-popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: flex-end;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px);
+    visibility: hidden;
+    transition: all 0.5s ease-in-out;
+}
+
+#factous-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+#factous-image {
+    height: 140px;
+    width: auto;
+}
+
+#factous-text-bubble {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    padding: 15px;
+    border-radius: 10px;
+    margin-right: -20px;
+    margin-bottom: 25px;
+    max-width: 250px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    position: relative;
+    border: 2px solid var(--color-primary);
+}
+
+#factous-text-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 25px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: var(--color-primary) transparent transparent transparent;
+}
+
+.meme-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    background-color: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 4px;
+}
+.meme-preview {
+    width: 100px;
+    height: auto;
+}
+.meme-item span {
+    flex-grow: 1; /* Ocupa el espacio sobrante */
+}
+.delete-meme-btn {
+    background-color: #C62828; /* Rojo de error */
+    margin-top: 0;
+}
+
+/* Ajuste para centrar verticalmente el título en el header */
+header h1 {
+    margin: 0; /* Elimina el margen por defecto del h1 */
+    font-size: 1.5em; /* Puedes ajustar el tamaño si lo ves muy grande */
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Porra DORM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="notification-container"></div>
+    <header>
+        <h1>Panel de Administrador</h1>
+    </header>
+    <main>
+        <section id="login-section">
+            <h2>Acceso Restringido</h2>
+            <form id="login-form">
+                <div class="form-row">
+                    <input type="password" id="admin-password" placeholder="Contraseña de Admin" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+        </section>
+
+        <section id="admin-panel-section" style="display: none;">
+            <div class="admin-column">
+                <h2>Crear Nuevo Partido</h2>
+                <form id="create-match-form">
+                    <div class="form-row">
+                        <input type="text" id="competicion" placeholder="Competición (ej: La Liga)" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="datetime-local" id="fecha" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="equipo-local" placeholder="Equipo Local" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="equipo-visitante" placeholder="Equipo Visitante" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="jornada" placeholder="Jornada" required min="1">
+                    </div>
+                    <div class="form-row">
+                        <input type="checkbox" id="es-partidazo">
+                        <label for="es-partidazo">Marcar como Partidazo DORM (x2)</label>
+                    </div>
+                    <button type="submit">Crear Partido</button>
+                </form>
+                <hr style="margin: 40px 0;">
+                <h2>Gestionar Memes</h2>
+                <form id="create-meme-form">
+                    <div class="form-row">
+                        <input type="url" id="meme-url" placeholder="URL de la imagen del meme" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="meme-desc" placeholder="Descripción corta (opcional)">
+                    </div>
+                    <button type="submit">Añadir Meme</button>
+                </form>
+                <hr>
+                <h3>Memes Actuales</h3>
+                <div id="memes-list-container">
+                    </div>
+                <hr style="margin: 40px 0;">
+                <hr style="margin: 40px 0;"> <h2>Gestionar Usuarios</h2>
+                <form id="create-user-form">
+                    <div class="form-row">
+                        <input type="text" id="discord-id" placeholder="ID de Discord (ej: xyri#3288)" required>
+                    </div>
+                    <button type="submit">Añadir Usuario</button>
+                </form>
+                <hr>
+                <h3>Usuarios Actuales</h3>
+                <div id="users-list-container">
+                    </div>
+            </div>
+
+            <div class="admin-column">
+                <h2>Partidos por Finalizar</h2>
+                <div id="upcoming-matches-container">
+                    </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/data.js" defer></script>
+    <script src="/static/admin.js" defer></script>
+</body>
+</html>
