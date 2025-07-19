@@ -3,6 +3,7 @@ from datetime import datetime
 
 # --- ESQUEMAS DE USUARIO (sin cambios) ---
 class UsuarioBase(BaseModel):
+    Alias: str
     Nombre_Usuario_Discord: str
 
 class UsuarioCreate(UsuarioBase):
@@ -54,6 +55,7 @@ class Prediccion(BaseModel):
     ID_Prediccion: int
     ID_Partido: int
     ID_Usuario: int
+    Nombre_Usuario_Discord: str
     Prediccion_Goles_Local: int
     Prediccion_Goles_Visitante: int
     Prediccion_Goleador: str
@@ -83,3 +85,9 @@ class Meme(MemeBase):
 
     class Config:
         from_attributes = True
+
+class PrediccionUpdate(BaseModel):
+    Prediccion_Goles_Local: int
+    Prediccion_Goles_Visitante: int
+    Prediccion_Goleador: str
+    Prediccion_MVP: str

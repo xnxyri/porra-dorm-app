@@ -1,7 +1,9 @@
 function showNotification(message, type = 'success') {
     const container = document.getElementById('notification-container');
+    if (!container) return; // Añadimos esta seguridad
     container.textContent = message;
-    container.className = type; // success o error
+    container.className = 'notification'; // Clase base
+    container.classList.add(type); // success o error
     container.classList.add('show');
 
     setTimeout(() => {
@@ -21,7 +23,7 @@ async function cargarPartidosParaPredecir() {
         const container = document.getElementById('form-container');
         container.innerHTML = '';
 
-        const partidosPorJugar = partidos.filter(p => p.Estado === 'Por jugar');
+        const partidosPorJugar = partidos.filter(p => p.Estado && p.Estado.trim().toLowerCase() === 'por jugar');
         if (partidosPorJugar.length === 0) {
             container.innerHTML = '<p>No hay partidos disponibles para predecir en este momento.</p>';
             return;
@@ -30,19 +32,10 @@ async function cargarPartidosParaPredecir() {
         const form = document.createElement('form');
         form.id = 'prediction-form';
         
+        // El campo de usuario se queda como estaba
         partidosPorJugar.forEach(partido => {
-            const equipoLocal = partido.Equipo_Local;
-            const equipoVisitante = partido.Equipo_Visitante;
-
-            const plantillaLocal = plantillasEquipos[equipoLocal] || [];
-            const plantillaVisitante = plantillasEquipos[equipoVisitante] || [];
-            const plantillaMadrid = plantillasEquipos["Real Madrid"] || [];
-
-            const goleadorOptions = plantillaMadrid.map(p => `<option value="${p}">${p}</option>`).join('');
-            const mvpLocalOptions = plantillaLocal.map(p => `<option value="${p}">${p}</option>`).join('');
-            const mvpVisitanteOptions = plantillaVisitante.map(p => `<option value="${p}">${p}</option>`).join('');
-
             const matchDiv = document.createElement('div');
+            // ... (el código que crea el HTML de cada partido se queda igual)
             matchDiv.className = 'match-prediction';
             matchDiv.dataset.matchId = partido.ID_Partido;
 
@@ -50,9 +43,9 @@ async function cargarPartidosParaPredecir() {
                 <p class="match-info">${partido.Competicion} - Jornada ${partido.Jornada_Numero}</p>
                 <p class="match-info">${new Date(partido.Fecha_Hora_Partido).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                 <h4 class="match-header">
-                    <img src="${escudos[equipoLocal] || ''}" alt="${equipoLocal}" class="team-crest">
-                    <span>${equipoLocal} vs ${equipoVisitante}</span>
-                    <img src="${escudos[equipoVisitante] || ''}" alt="${equipoVisitante}" class="team-crest">
+                    <img src="${escudos[partido.Equipo_Local] || ''}" alt="${partido.Equipo_Local}" class="team-crest">
+                    <span>${partido.Equipo_Local} vs ${partido.Equipo_Visitante}</span>
+                    <img src="${escudos[partido.Equipo_Visitante] || ''}" alt="${partido.Equipo_Visitante}" class="team-crest">
                 </h4>
                 <div class="form-row">
                     <input type="number" placeholder="Goles L" name="goles_local" required min="0">
@@ -62,7 +55,7 @@ async function cargarPartidosParaPredecir() {
                 <div class="form-row">
                     <select name="goleador" required>
                         <option value="" disabled selected>Primer Goleador (RM)</option>
-                        ${goleadorOptions}
+                        ${plantillasEquipos["Real Madrid"].map(p => `<option value="${p}">${p}</option>`).join('')}
                     </select>
                 </div>
                 <p>MVP del Partido:</p>`;
@@ -70,22 +63,16 @@ async function cargarPartidosParaPredecir() {
 
             const mvpRow = document.createElement('div');
             mvpRow.className = 'form-row';
-
+            const plantillaLocal = plantillasEquipos[partido.Equipo_Local] || [];
+            const plantillaVisitante = plantillasEquipos[partido.Equipo_Visitante] || [];
             const mvpLocalSelect = document.createElement('select');
             mvpLocalSelect.name = 'mvp_local';
-            mvpLocalSelect.innerHTML = `<option value="" disabled selected>${equipoLocal}</option>${mvpLocalOptions}`;
-
+            mvpLocalSelect.innerHTML = `<option value="" disabled selected>${partido.Equipo_Local}</option>${plantillaLocal.map(p => `<option value="${p}">${p}</option>`).join('')}`;
             const mvpVisitanteSelect = document.createElement('select');
             mvpVisitanteSelect.name = 'mvp_visitante';
-            mvpVisitanteSelect.innerHTML = `<option value="" disabled selected>${equipoVisitante}</option>${mvpVisitanteOptions}`;
-
-            mvpLocalSelect.addEventListener('change', () => {
-                if (mvpLocalSelect.value) mvpVisitanteSelect.selectedIndex = 0;
-            });
-            mvpVisitanteSelect.addEventListener('change', () => {
-                if (mvpVisitanteSelect.value) mvpLocalSelect.selectedIndex = 0;
-            });
-
+            mvpVisitanteSelect.innerHTML = `<option value="" disabled selected>${partido.Equipo_Visitante}</option>${plantillaVisitante.map(p => `<option value="${p}">${p}</option>`).join('')}`;
+            mvpLocalSelect.addEventListener('change', () => { if (mvpLocalSelect.value) mvpVisitanteSelect.selectedIndex = 0; });
+            mvpVisitanteSelect.addEventListener('change', () => { if (mvpVisitanteSelect.value) mvpLocalSelect.selectedIndex = 0; });
             mvpRow.appendChild(mvpLocalSelect);
             mvpRow.appendChild(mvpVisitanteSelect);
             matchDiv.appendChild(mvpRow);
@@ -110,16 +97,32 @@ async function cargarPartidosParaPredecir() {
         form.appendChild(submitButton);
         container.appendChild(form);
         form.addEventListener('submit', handleFormSubmit);
+
+        // --- LÓGICA NUEVA PARA EL BOOSTER ÚNICO ---
+        const boosterCheckboxes = form.querySelectorAll('input[name="booster"]');
+        boosterCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                // Si este checkbox se ha marcado...
+                if (event.target.checked) {
+                    // ...recorremos todos los demás y los desmarcamos.
+                    boosterCheckboxes.forEach(otherCheckbox => {
+                        if (otherCheckbox !== event.target) {
+                            otherCheckbox.checked = false;
+                        }
+                    });
+                }
+            });
+        });
+        // --- FIN DE LA LÓGICA NUEVA ---
+
     } catch (error) {
         console.error("Error al cargar los partidos:", error);
     }
 }
 
-// Función para manejar el envío del formulario
 async function handleFormSubmit(event) {
     event.preventDefault();
 
-    // --- VALIDACIÓN MEJORADA ---
     const discordUserInput = document.getElementById('discord-username');
     const discordUser = discordUserInput.value;
     if (!discordUser.trim()) {
@@ -130,9 +133,7 @@ async function handleFormSubmit(event) {
 
     const formMatches = document.querySelectorAll('.match-prediction');
     let isFormValid = true;
-
     formMatches.forEach(matchDiv => {
-        // Revisa todos los inputs de texto y número
         const regularInputs = matchDiv.querySelectorAll('input[type="number"], select[name="goleador"]');
         regularInputs.forEach(input => {
             if (!input.value) {
@@ -142,12 +143,8 @@ async function handleFormSubmit(event) {
                 input.style.border = '1px solid var(--color-border)';
             }
         });
-
-        // Revisa el caso especial del MVP
         const mvpLocalSelect = matchDiv.querySelector('[name="mvp_local"]');
         const mvpVisitanteSelect = matchDiv.querySelector('[name="mvp_visitante"]');
-
-        // Si ninguno de los dos desplegables de MVP tiene un valor, es un error
         if (!mvpLocalSelect.value && !mvpVisitanteSelect.value) {
             isFormValid = false;
             mvpLocalSelect.style.border = '2px solid red';
@@ -162,16 +159,12 @@ async function handleFormSubmit(event) {
         showNotification("Por favor, rellena todos los campos requeridos.", 'error');
         return;
     }
-    // --- FIN VALIDACIÓN ---
-
-
-    // El resto del código para enviar los datos se queda igual...
+    
     const predictions = [];
     formMatches.forEach(matchDiv => {
         const mvpLocal = matchDiv.querySelector('[name="mvp_local"]').value;
         const mvpVisitante = matchDiv.querySelector('[name="mvp_visitante"]').value;
         const boosterInput = matchDiv.querySelector('[name="booster"]');
-
         const prediction = {
             ID_Partido: parseInt(matchDiv.dataset.matchId),
             Nombre_Usuario_Discord: discordUser,
@@ -184,14 +177,30 @@ async function handleFormSubmit(event) {
         predictions.push(prediction);
     });
 
-    for (const pred of predictions) {
-        await fetch('/predictions/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(pred)
-        });
-    }
+try {
+        // Usamos un bucle for...of para poder detenerlo si hay un error
+        for (const pred of predictions) {
+            const response = await fetch('/predictions/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pred)
+            });
 
-    showNotification('¡Predicciones enviadas con éxito!', 'success');
-    setTimeout(() => { window.location.href = "/"; }, 1500);
+            // --- LÓGICA NUEVA: Comprobamos la respuesta del servidor ---
+            if (!response.ok) {
+                const errorData = await response.json();
+                // Mostramos el mensaje de error específico que nos da el backend
+                showNotification(`Error: ${errorData.detail}`, 'error');
+                return; // Detenemos el proceso si una predicción falla
+            }
+        }
+
+        // Si el bucle termina sin errores, mostramos el mensaje de éxito
+        showNotification('¡Predicciones enviadas con éxito!', 'success');
+        setTimeout(() => { window.location.href = "/"; }, 1500);
+
+    } catch (error) {
+        showNotification('Hubo un error de conexión al enviar.', 'error');
+    }
 }
+

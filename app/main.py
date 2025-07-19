@@ -27,6 +27,14 @@ async def read_index():
 async def read_predictions_page():
     return FileResponse('static/predicciones.html')
 
+@app.get("/resultados", response_class=FileResponse)
+async def read_results_page():
+    return FileResponse('static/resultados.html')
+
+@app.get("/normas", response_class=FileResponse)
+async def read_rules_page():
+    return FileResponse('static/normas.html')
+
 # Ruta para la página de admin (la creamos pero no la hemos enlazado aún)
 @app.get("/admin", response_class=FileResponse)
 async def read_admin_page():

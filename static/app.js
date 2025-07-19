@@ -1,19 +1,3 @@
-// --- LÓGICA DE FACTOUS ---
-const factousData = [
-    {
-        text: "Zi no hubiera zio por las predicciones especiale, Hamau era Top 3 del DORM y me zua to loh cohone",
-        image: "https://cdn.futwiz.com/assets/img/fc25/faces/278349.png?25"
-    },
-    {
-        text: "MRajoy último en el més de Abril. Automáticamente: eu farei 10x se for preciso",
-        image: "https://sortitoutsidospaces.b-cdn.net/megapacks/cutoutfaces/originals/2024.12/19302146.png"
-    },
-    {
-        text: "Dije bloque bajo, no ir de los últimos de la tabla, vaffanculo",
-        image: "https://cdn.fctoolshub.com/game_assets/fc25/managers/237388.png"
-    }
-];
-
 function showRandomFactou() {
     const popup = document.getElementById('factous-popup');
     if (!popup) return;
@@ -86,21 +70,22 @@ async function cargarClasificacionGeneral() {
 // 2. Prepara el selector de MES
 function setupMonthSelector() {
     const selector = document.getElementById('month-selector');
-    selector.innerHTML = ''; // Limpiamos el selector por si acaso
+    selector.innerHTML = ''; // Limpiamos el selector
 
     const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     const añoInicio = 2025;
     const añoFin = 2026;
 
-    // Añadimos los meses de 2025 (desde Agosto)
-    for (let mes = 7; mes < 12; mes++) { // 7 es Agosto (los meses van de 0 a 11)
+    // Generamos las opciones del desplegable para la temporada
+    // Meses de 2025 (desde Agosto)
+    for (let mes = 7; mes < 12; mes++) { // 7 es Agosto
         const option = document.createElement('option');
         option.value = `${añoInicio}-${mes + 1}`;
         option.textContent = `${meses[mes]} ${añoInicio}`;
         selector.appendChild(option);
     }
 
-    // Añadimos los meses de 2026 (hasta Mayo)
+    // Meses de 2026 (hasta Mayo)
     for (let mes = 0; mes < 5; mes++) { // 4 es Mayo
         const option = document.createElement('option');
         option.value = `${añoFin}-${mes + 1}`;
@@ -108,8 +93,22 @@ function setupMonthSelector() {
         selector.appendChild(option);
     }
 
-    // Seleccionamos el último mes disponible por defecto
-    selector.selectedIndex = selector.options.length -1;
+    // --- LÓGICA NUEVA PARA SELECCIONAR EL MES POR DEFECTO ---
+    const fechaActual = new Date();
+    let mesPorDefecto = fechaActual.getMonth() + 1;
+    let añoPorDefecto = fechaActual.getFullYear();
+
+    // Regla especial: si estamos en Julio, mostramos Agosto por defecto
+    if (mesPorDefecto === 7 && añoPorDefecto === 2025) {
+        mesPorDefecto = 8;
+    }
+
+    // Buscamos la opción correspondiente y la seleccionamos
+    const valorPorDefecto = `${añoPorDefecto}-${mesPorDefecto}`;
+    if (selector.querySelector(`[value="${valorPorDefecto}"]`)) {
+        selector.value = valorPorDefecto;
+    }
+    // --------------------------------------------------------
 
     // Cargamos la clasificación del mes seleccionado
     cargarClasificacionMensual();

@@ -17,7 +17,14 @@
             <h1>PORRA DORM 25/26</h1>
         </div>
 
-        <button id="theme-toggle">Cambiar Tema</button>
+        <nav class="header-nav">
+            <a href="/resultados" class="nav-button">Resultados y Leaks</a>
+            <a href="/normas" class="nav-button">Normas</a>
+            <button id="theme-toggle" title="Cambiar Tema">
+                <svg class="sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.803 17.803a.75.75 0 01-1.06 0l-1.59-1.591a.75.75 0 111.06-1.06l1.59 1.59a.75.75 0 010 1.06zM12 21a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0v2.25a.75.75 0 01-.75.75zM5.106 18.894a.75.75 0 010-1.06l1.59-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM3 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3.75A.75.75 0 013 12zM6.107 5.106a.75.75 0 011.06 0l1.59 1.591a.75.75 0 11-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06z"/></svg>
+                <svg class="moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-3.834 2.057-7.168 5.168-8.972a.75.75 0 01.818.162z" clip-rule="evenodd"/></svg>
+            </button>
+        </nav>
     </header>
     <section id="hero-carousel">
         <img id="carousel-image" src="" alt="Meme de la porra">
@@ -28,26 +35,23 @@
         </section>
 
         <section id="clasificacion">
-            <h2>Clasificación</h2>
             <div class="leaderboards-wrapper">
                 <div class="leaderboard-box">
-                    <h3>General</h3>
-                    <div id="general-leaderboard-container"></div>
+                    <div class="leaderboard-header">
+                        <h3>Clasificación General</h3>
+                    </div>
+                    <div id="general-leaderboard-container">
+                        </div>
                 </div>
                 <div class="leaderboard-box">
-                    <div class="monthly-header">
-                        <h3>Mensual</h3>
+                    <div class="leaderboard-header">
+                        <h3>Clasificación Mensual</h3>
                         <select id="month-selector"></select>
                     </div>
-                    <div id="monthly-leaderboard-container"></div>
+                    <div id="monthly-leaderboard-container">
+                        </div>
                 </div>
             </div>
-        </section>
-
-        <section id="resultados">
-            <h2>Últimos Resultados</h2>
-            <div id="results-container">
-                </div>
         </section>
     </main>
 

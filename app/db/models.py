@@ -6,6 +6,7 @@ Base = declarative_base()
 class Usuario(Base):
     __tablename__ = "usuarios"
     ID_Usuario = Column(Integer, primary_key=True, index=True)
+    Alias = Column(String, unique=True, index=True)
     Nombre_Usuario_Discord = Column(String, unique=True, index=True)
     Puntuacion_Total = Column(Integer, default=0)
     Win_Streak_Consecutivos = Column(Integer, default=0)
@@ -45,3 +46,4 @@ class Meme(Base):
     ID_Meme = Column(Integer, primary_key=True, index=True)
     URL_Imagen = Column(String, nullable=False)
     Descripcion = Column(String, nullable=True)
+    

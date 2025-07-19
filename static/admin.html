@@ -86,7 +86,29 @@
             </div>
         </section>
     </main>
-
+            <div id="edit-modal" class="modal-overlay" style="display:none;">
+                <div class="modal-content">
+                    <h2>Editar Predicción</h2>
+                    <form id="edit-prediction-form">
+                        <input type="hidden" id="edit-prediction-id">
+                        <div class="form-row">
+                            <input type="number" id="edit-goles-local" required>
+                            <span>-</span>
+                            <input type="number" id="edit-goles-visitante" required>
+                        </div>
+                        <div class="form-row">
+                            <select id="edit-goleador" required></select>
+                        </div>
+                        <div class="form-row">
+                            <select id="edit-mvp" required></select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit">Guardar Cambios</button>
+                            <button type="button" id="cancel-edit-btn">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     <script src="/static/data.js" defer></script>
     <script src="/static/admin.js" defer></script>
 </body>

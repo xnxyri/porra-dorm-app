@@ -1,3 +1,11 @@
+// Listener que se asegura de que la página está lista antes de aplicar el tema
+document.addEventListener('DOMContentLoaded', () => {
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+});
+
 // Almacén central de datos para la aplicación
 
 const escudos = {
@@ -6,61 +14,47 @@ const escudos = {
     "Atlético de Madrid": "https://media.api-sports.io/football/teams/530.png",
     "CA Osasuna": "https://media.api-sports.io/football/teams/727.png",
     "RCD Mallorca": "https://media.api-sports.io/football/teams/798.png",
-    "Real Oviedo": "https://media.api-sports.io/football/teams/718.png"
+    "Real Oviedo": "https://media.api-sports.io/football/teams/724.png"
     // ...etc
 };
 
-// --- NUEVO ALMACÉN DE PLANTILLAS ---
 const plantillasEquipos = {
     "Real Madrid": [
-        "Thibaut Courtois", "Andriy Lunin", 
-        "Dani Carvajal", "Éder Militão", "David Alaba", "Trent Alexander-Arnold", "Alvaro Carreras", "Fran García", "Antonio Rüdiger", "Ferland Mendy", "Dean Huijsen",
-        "Jude Bellingham", "Eduardo Camavinga", "Fede Valverde", "Aurélien Tchouameni", "Arda Güler", "Dani Ceballos",
-        "Vini Jr.", "Kylian Mbappé", "Rodrygo", "Endrick", "Brahim Díaz"
+        "Thibaut Courtois", "Andriy Lunin", "Dani Carvajal", "Éder Militão", "David Alaba", 
+        "Nacho", "Antonio Rüdiger", "Ferland Mendy", "Fran García", "Aurélien Tchouaméni", 
+        "Toni Kroos", "Luka Modrić", "Eduardo Camavinga", "Fede Valverde", "Jude Bellingham", 
+        "Dani Ceballos", "Arda Güler", "Brahim Díaz", "Vinicius Jr.", "Rodrygo", "Joselu", 
+        "Endrick", "Kylian Mbappé"
     ],
     "CA Osasuna": [
-        "Sergio Herrera", "Aitor Fernández", "Enzo Boyomo",
-        "Jorge Hernando", "Alejandro Catena", "Abel Bretones", "Juan Cruz", "Jesús Areso", "Valentín Rosier",
-        "Lucas Torró", "Iker Muñoz", "Jon Moncayola", "Aimar Oroz",
-        "Moi Gómez", "Víctor Muñoz", "Iker Benito", "Kike Barja", "Ante Budimir", "Raúl García"
+        "Sergio Herrera", "Aitor Fernández", "Unai García", "David García", "Juan Cruz", 
+        "Jesús Areso", "Johan Mojica", "Lucas Torró", "Jon Moncayola", "Aimar Oroz", 
+        "Moi Gómez", "Rubén García", "Ante Budimir"
     ],
     "Real Oviedo": [
-        "Aarón Escandell",
-        "David Costas", "Dani Calvo", "Oier Luengo", "Rahim Alhassane", "Carlos Pomares", "Nacho Vidal", "Lucas Ahijado", "Álvaro Lemos",
-        "Santiago Colombatto", "Alberto Reina", "Kwasi Sibo", "Alberto del Moral", "Yayo González", "Santi Cazorla", "Brandon Dominguès", "Alex Cardero",
-        "Ilyas Chaira", "Borja Sánchez", "Haissem Hassan", "Paulino de la Fuente", "Federico Viñas", "Daniel Paraschiv", "Salomón Rondón"
+        "Leo Román", "Quentin Braat", "Dani Calvo", "Oier Luengo", "Abel Bretones", 
+        "Mario Hernández", "Jaime Seoane", "Santiago Colombatto", "Paulino de la Fuente", 
+        "Borja Bastón", "Alemão"
     ],
-        "RCD Mallorca": [
-        "Dominik Grief", "Leo Román", "Lucas Bergström", "Ivan Cuellar",
-        "Martin Veljent", "José Copete", "Siebe Van der Heyden", "Antonio Raíllo", "David López", "Johan Mojica", "Toni Lato", "Pablo Maffeo", "Mateu Morey",
-        "Samú Costa", "Omar Mascarell", "Sergi Darder", "Manu Morlanes", "Antonio Sánchez", "Pablo Torre", "Dani Rodríguez", "Daniel Luna",
-        "Javi Llabrés", "Takuma Asano", "Vedat Muriqi", "Cyle Larin", "Abdon Prats", "Marc Domènech"
+    "RCD Mallorca": [
+        "Dominik Greif", "Leo Román", "Predrag Rajković", "Martin Valjent", "José Copete", 
+        "Antonio Raíllo", "Johan Mojica", "Toni Lato", "Pablo Maffeo", "Samú Costa", 
+        "Omar Mascarell", "Sergi Darder", "Manu Morlanes", "Dani Rodríguez", "Vedat Muriqi", 
+        "Cyle Larin"
     ]
-    // Para añadir un nuevo equipo, simplemente añade una nueva entrada:
-    // "Nombre del Equipo": ["Jugador 1", "Jugador 2", ...]
-
-}
-// --- DICCIONARIO DE ALIAS DE USUARIO ---
-// La clave es el "Nombre_Usuario_Discord" exacto que se usa en las predicciones,
-// y el valor es el alias que quieres que se muestre.
-const aliasUsuarios = {
-    "xyri#3288": "Xyri",
-    "Varoppo#2842": "Varoppo",
-    "MikeSullivanZero#4038": "MikeSullivanZero",
-    "Davis14#9710": "Davis14",
-    "Loki_Cat12#7511": "Loki_Cat12",
-    "elratedx#7229": "elratedx",
-    "sonfiL#5122": "sonfil",
-    "MRajoy#6824": "MRajoy",
-    "cfreire#2340": "Freyre",
-    "Babeta#1705": "Babeta",
-    "Sempai#9746": "Leagrove",
-    "Sinso#8330": "Sinso",
-    "Purelonie#7791": "Purelonie",
-    "Samawoodo#0195": "Samawoodo",
-    "Sorakabanana#0360": "Sorakbanana",
-    "CharlieZen#4751": "Hamau",
-
-
-    // Añade aquí a todos los participantes
 };
+
+const factousData = [
+    {
+        text: "Zi no hubiera zio por las predicciones especiale, Hamau era Top 3 del DORM y me zua to loh cohone",
+        image: "https://cdn.futwiz.com/assets/img/fc25/faces/278349.png?25" 
+    },
+    {
+        text: "MRajoy último en el més de Abril. Automáticamente: eu farei 10x se for preciso",
+        image: "https://sortitoutsidospaces.b-cdn.net/megapacks/cutoutfaces/originals/2024.12/19302146.png" 
+    },
+    {
+        text: "Dije bloque bajo, no ir de los últimos de la tabla, vaffanculo",
+        image: "https://cdn.fctoolshub.com/game_assets/fc25/managers/237388.png"
+    }
+];
