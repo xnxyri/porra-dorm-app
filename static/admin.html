@@ -69,6 +69,9 @@
                 <hr style="margin: 40px 0;"> <h2>Gestionar Usuarios</h2>
                 <form id="create-user-form">
                     <div class="form-row">
+                        <input type="text" id="alias" placeholder="Alias (ej: Xyri)" required>
+                    </div>
+                    <div class="form-row">
                         <input type="text" id="discord-id" placeholder="ID de Discord (ej: xyri#3288)" required>
                     </div>
                     <button type="submit">Añadir Usuario</button>
@@ -84,6 +87,84 @@
                 <div id="upcoming-matches-container">
                     </div>
             </div>
+                <div class="admin-column">
+        <h2>Finalizar Temporada LaLiga</h2>
+        <a href="/gestion-temporada" class="button-link" style="text-decoration:none;">Ver/Gestionar Predicciones</a>
+            <hr>
+        <form id="finalize-season-form">
+            <h3>Clasificación</h3>
+            <div class="form-row-stacked">
+                <label for="res-campeon">🏆 Campeón</label>
+                <select id="res-campeon" required></select>
+            </div>
+            <div class="form-row-stacked">
+                <label>🎟️ Clasificados para UCL</label>
+                <div class="form-grid">
+                    <select class="res-ucl" required></select>
+                    <select class="res-ucl" required></select>
+                    <select class="res-ucl" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🌍 Clasificados para Europa League</label>
+                <div class="form-grid">
+                    <select class="res-el" required></select>
+                    <select class="res-el" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label for="res-conference">🌱 Clasificado para Conference</label>
+                <select id="res-conference" required></select>
+            </div>
+            <div class="form-row-stacked">
+                <label>👇 Equipos que Descienden</label>
+                <div class="form-grid">
+                    <select class="res-descenso" required></select>
+                    <select class="res-descenso" required></select>
+                    <select class="res-descenso" required></select>
+                </div>
+            </div>
+
+            <h3>Premios Individuales</h3>
+            <div class="form-row-stacked">
+                <label>⚽ Pichichi</label>
+                <div class="player-selector-group">
+                    <select class="team-selector" data-player-target="res-pichichi"></select>
+                    <select id="res-pichichi" class="player-selector" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🎯 Máximo Asistente</label>
+                <div class="player-selector-group">
+                    <select class="team-selector" data-player-target="res-max-asistente"></select>
+                    <select id="res-max-asistente" class="player-selector" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🧤 Premio Zamora</label>
+                <div class="player-selector-group">
+                    <select class="team-selector" data-player-target="res-zamora" data-filter="goalkeeper"></select>
+                    <select id="res-zamora" class="player-selector" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🇪🇸 Premio Zarra</label>
+                <div class="player-selector-group">
+                    <select class="team-selector" data-player-target="res-zarra" data-filter="spanish"></select>
+                    <select id="res-zarra" class="player-selector" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🏆 MVP de la Temporada</label>
+                <div class="player-selector-group">
+                    <select class="team-selector" data-player-target="res-mvp"></select>
+                    <select id="res-mvp" class="player-selector" required></select>
+                </div>
+            </div>
+
+            <button type="submit">Calcular y Repartir Puntos Finales</button>
+        </form>
+    </div>
         </section>
     </main>
             <div id="edit-modal" class="modal-overlay" style="display:none;">
@@ -109,6 +190,7 @@
                     </form>
                 </div>
             </div>
+    
     <script src="/static/data.js" defer></script>
     <script src="/static/admin.js" defer></script>
 </body>

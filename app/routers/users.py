@@ -23,9 +23,9 @@ def create_user(user: schemas.UsuarioCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=List[schemas.Usuario])
 def get_users(db: Session = Depends(get_db)):
-    users = db.query(models.Usuario).order_by(models.Usuario.Alias).all()
+    users = db.query(models.Usuario).order_by(models.Usuario.Puntuacion_Total.desc()).all()
     return users
-
+    
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = db.query(models.Usuario).filter(models.Usuario.ID_Usuario == user_id).first()
@@ -35,7 +35,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     has_predictions = db.query(models.Prediccion).filter(models.Prediccion.ID_Usuario == user_id).first()
     if has_predictions:
         raise HTTPException(status_code=400, detail="No se puede borrar un usuario que ya tiene predicciones.")
-
+    
     db.delete(db_user)
     db.commit()
     return {"ok": True}

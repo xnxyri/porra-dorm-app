@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hacer Predicción - Porra DORM</title>
-    <script src="/static/data.js"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -13,21 +12,18 @@
         <h1>Haz tu Predicción 📝</h1>
         <a href="/" class="button-link">Volver a la Portada</a>
     </header>
-
     <main>
         <section id="predicciones">
-            <div class="user-input-container">
-                <input type="text" id="discord-username" placeholder="Tu nombre de usuario de Discord (ej: xyri#3288)" required>
-            </div>
-            <div id="form-container">
-            </div>
+            <form id="prediction-form">
+                <div class="user-input-container">
+                    <input type="text" id="discord-username" placeholder="Tu nombre de usuario de Discord (ej: xyri#3288)" required>
+                </div>
+                <div id="form-container">
+                    </div>
+            </form>
         </section>
     </main>
-
-    <footer>
-        <p>Hecho con ❤️ para la comunidad DORM</p>
-    </footer>
-
-    <script src="/static/predicciones.js"></script>
+    <script src="/static/data.js" defer></script>
+    <script src="/static/predicciones.js" defer></script>
 </body>
 </html>

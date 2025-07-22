@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import relationship
 from .database import Base
-Base = declarative_base()
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -20,7 +19,7 @@ class Partido(Base):
     Fecha_Hora_Partido = Column(DateTime)
     Goles_Local = Column(Integer, nullable=True)
     Goles_Visitante = Column(Integer, nullable=True)
-    Estado = Column(String, default='Por jugar') # 'Por jugar', 'Finalizado'
+    Estado = Column(String, default='Por jugar')
     Jornada_Numero = Column(Integer)
     Competicion = Column(String)
     Es_Partidazo = Column(Boolean, default=False)
@@ -46,4 +45,19 @@ class Meme(Base):
     ID_Meme = Column(Integer, primary_key=True, index=True)
     URL_Imagen = Column(String, nullable=False)
     Descripcion = Column(String, nullable=True)
-    
+
+class PrediccionTemporada(Base):
+    __tablename__ = "predicciones_temporada"
+    ID_Prediccion_Temporada = Column(Integer, primary_key=True, index=True)
+    ID_Usuario = Column(Integer, ForeignKey("usuarios.ID_Usuario"))
+    Competicion = Column(String, index=True)
+    Campeon = Column(String)
+    Clasificados_UCL = Column(String)
+    Clasificados_EL = Column(String)
+    Clasificado_Conference = Column(String)
+    Descensos = Column(String)
+    Pichichi = Column(String)
+    Max_Asistente = Column(String)
+    Zamora = Column(String)
+    Zarra = Column(String)
+    MVP = Column(String, nullable=True)

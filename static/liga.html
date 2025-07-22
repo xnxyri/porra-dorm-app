@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicciones La Liga 25/26 - Porra DORM</title>
+    <script src="/static/data.js" defer></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="notification-container"></div>
+    <header>
+        <div class="header-left">
+            <img src="https://media.api-sports.io/football/teams/541.png" alt="Escudo Real Madrid" id="header-crest">
+            <h1>Predicciones La Liga 25/26</h1>
+        </div>
+        <a href="/" class="button-link">Volver a la Portada</a>
+    </header>
+    <main>
+        <section>
+            <form id="liga-prediction-form">
+                <div class="user-input-container">
+                    <input type="text" id="discord-username" placeholder="Tu nombre de usuario de Discord (ej: xyri#3288)" required>
+                </div>
+                
+                <h3>Clasificación Final</h3>
+                <div class="form-row-stacked">
+                    <label for="campeon">🏆 Campeón</label>
+                    <select id="campeon" required></select>
+                </div>
+                <div class="form-row-stacked">
+                    <label>🎟️ Clasificados para UCL (Top 4)</label>
+                    <div class="form-grid">
+                        <select class="ucl-spot" required></select>
+                        <select class="ucl-spot" required></select>
+                        <select class="ucl-spot" required></select>
+                    </div>
+                </div>
+                 <div class="form-row-stacked">
+                    <label>🌍 Clasificados para Europa League</label>
+                    <div class="form-grid">
+                        <select class="el-spot" required></select>
+                        <select class="el-spot" required></select>
+                    </div>
+                </div>
+                <div class="form-row-stacked">
+                    <label>🌱 Clasificado para Conference League</label>
+                    <select id="conference-spot" required></select>
+                </div>
+                <div class="form-row-stacked">
+                    <label>👇 Equipos que Descienden</label>
+                    <div class="form-grid">
+                        <select class="descenso-spot" required></select>
+                        <select class="descenso-spot" required></select>
+                        <select class="descenso-spot" required></select>
+                    </div>
+                </div>
+
+                <h3>Premios Individuales</h3>
+                
+                <div class="form-row-stacked">
+                    <label for="pichichi-team">⚽ Pichichi (Máximo Goleador)</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="pichichi-player"></select>
+                        <select id="pichichi-player" name="pichichi" class="player-selector" required></select>
+                    </div>
+                </div>
+                
+                <div class="form-row-stacked">
+                    <label for="max-asistente-team">🎯 Máximo Asistente</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="max-asistente-player"></select>
+                        <select id="max-asistente-player" name="max-asistente" class="player-selector" required></select>
+                    </div>
+                </div>
+                
+                <div class="form-row-stacked">
+                    <label for="zamora-team">🧤 Premio Zamora (Mejor Portero)</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="zamora-player" data-filter="goalkeeper"></select>
+                        <select id="zamora-player" name="zamora" class="player-selector" required></select>
+                    </div>
+                </div>
+                
+                <div class="form-row-stacked">
+                    <label for="zarra-team">🇪🇸 Premio Zarra (Máx. Goleador Español)</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="zarra-player" data-filter="spanish"></select>
+                        <select id="zarra-player" name="zarra" class="player-selector" required></select>
+                    </div>
+                </div>
+
+                <div class="form-row-stacked">
+                    <label for="mvp-team">🏆 MVP de la Temporada</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="mvp-player"></select>
+                        <select id="mvp-player" name="mvp" class="player-selector" required></select>
+                    </div>
+                </div>
+                
+                <button type="submit">Enviar Predicciones de Temporada</button>
+            </form>
+        </section>
+    </main>
+    <script src="/static/liga.js" defer></script>
+</body>
+</html>

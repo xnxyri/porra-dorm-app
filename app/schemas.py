@@ -1,7 +1,10 @@
 from pydantic import BaseModel
+from typing import List
 from datetime import datetime
 
-# --- ESQUEMAS DE USUARIO (sin cambios) ---
+# ========================================================================
+# ESQUEMAS PARA USUARIOS
+# ========================================================================
 class UsuarioBase(BaseModel):
     Alias: str
     Nombre_Usuario_Discord: str
@@ -17,7 +20,9 @@ class Usuario(UsuarioBase):
     class Config:
         from_attributes = True
 
-# --- ESQUEMAS DE PARTIDO (sin cambios) ---
+# ========================================================================
+# ESQUEMAS PARA PARTIDOS
+# ========================================================================
 class PartidoBase(BaseModel):
     Equipo_Local: str
     Equipo_Visitante: str
@@ -35,12 +40,18 @@ class Partido(PartidoBase):
 
     class Config:
         from_attributes = True
+        
+class PartidoFinalizar(BaseModel):
+    Goles_Local: int
+    Goles_Visitante: int
+    Goleador_Real: str
+    MVP_Real: str
 
-# --- ESQUEMAS DE PREDICCIÓN (CON CAMBIOS) ---
-# Este es el esquema para ENVIAR una predicción (sin cambios)
+# ========================================================================
+# ESQUEMAS PARA PREDICCIONES POR PARTIDO
+# ========================================================================
 class PrediccionBase(BaseModel):
     ID_Partido: int
-    Nombre_Usuario_Discord: str
     Prediccion_Goles_Local: int
     Prediccion_Goles_Visitante: int
     Prediccion_Goleador: str
@@ -48,31 +59,27 @@ class PrediccionBase(BaseModel):
     Booster_Activado: bool = False
 
 class PrediccionCreate(PrediccionBase):
-    pass
-
-# Este es el esquema para la RESPUESTA (CON CAMBIOS)
-class Prediccion(BaseModel):
-    ID_Prediccion: int
-    ID_Partido: int
-    ID_Usuario: int
     Nombre_Usuario_Discord: str
+
+class Prediccion(PrediccionBase):
+    ID_Prediccion: int
+    ID_Usuario: int
+    Puntos_Obtenidos: int
+    Alias: str
+    Nombre_Usuario_Discord: str
+    
+    class Config:
+        from_attributes = True
+        
+class PrediccionUpdate(BaseModel):
     Prediccion_Goles_Local: int
     Prediccion_Goles_Visitante: int
     Prediccion_Goleador: str
     Prediccion_MVP: str
-    Booster_Activado: bool
-    Puntos_Obtenidos: int
 
-    class Config:
-        from_attributes = True
-
-class PartidoFinalizar(BaseModel):
-    Goles_Local: int
-    Goles_Visitante: int
-    Goleador_Real: str
-    MVP_Real: str
-
-# --- ESQUEMAS PARA MEMES ---
+# ========================================================================
+# ESQUEMAS PARA MEMES
+# ========================================================================
 class MemeBase(BaseModel):
     URL_Imagen: str
     Descripcion: str | None = None
@@ -86,8 +93,42 @@ class Meme(MemeBase):
     class Config:
         from_attributes = True
 
-class PrediccionUpdate(BaseModel):
-    Prediccion_Goles_Local: int
-    Prediccion_Goles_Visitante: int
-    Prediccion_Goleador: str
-    Prediccion_MVP: str
+# ========================================================================
+# ESQUEMAS PARA PREDICCIONES DE TEMPORADA
+# ========================================================================
+class PrediccionTemporadaBase(BaseModel):
+    Competicion: str
+    Campeon: str
+    Clasificados_UCL: List[str]
+    Clasificados_EL: List[str]
+    Clasificado_Conference: str
+    Descensos: List[str]
+    Pichichi: str
+    Max_Asistente: str
+    Zamora: str
+    Zarra: str
+    MVP: str | None = None
+
+class PrediccionTemporadaCreate(PrediccionTemporadaBase):
+    Nombre_Usuario_Discord: str
+
+class PrediccionTemporada(PrediccionTemporadaBase):
+    ID_Prediccion_Temporada: int
+    ID_Usuario: int
+    Alias: str
+
+    class Config:
+        from_attributes = True
+
+class ResultadoTemporada(BaseModel):
+    Competicion: str
+    Campeon: str
+    Clasificados_UCL: List[str]
+    Clasificados_EL: List[str]
+    Clasificado_Conference: str
+    Descensos: List[str]
+    Pichichi: str
+    Max_Asistente: str
+    Zamora: str
+    Zarra: str
+    MVP: str | None = None

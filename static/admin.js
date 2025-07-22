@@ -13,13 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const createMemeForm = document.getElementById('create-meme-form');
     if (createMemeForm) createMemeForm.addEventListener('submit', handleCreateMeme);
 
+    const finalizeSeasonForm = document.getElementById('finalize-season-form');
+    if (finalizeSeasonForm) finalizeSeasonForm.addEventListener('submit', handleFinalizeSeason);
+    
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditModal);
 
     const editPredictionForm = document.getElementById('edit-prediction-form');
     if (editPredictionForm) editPredictionForm.addEventListener('submit', handleUpdatePrediction);
 });
-
 
 // =================================================================================
 // SECCIÓN DE LOGIN
@@ -29,16 +31,14 @@ async function handleLogin(event) {
     const password = document.getElementById('admin-password').value;
     const formData = new FormData();
     formData.append('password', password);
-
     try {
         const response = await fetch('/admin/token', { method: 'POST', body: formData });
         if (response.ok) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-panel-section').style.display = 'flex';
-            // Al iniciar sesión, cargamos todo el contenido del panel
             cargarUsuarios();
-            cargarMemesAdmin();
             cargarPartidosPorJugar();
+            populateFinalizeForm();
         } else {
             showNotification("Error: Contraseña incorrecta", 'error');
         }
@@ -46,7 +46,6 @@ async function handleLogin(event) {
         showNotification("Ha ocurrido un error de conexión.", 'error');
     }
 }
-
 
 // =================================================================================
 // SECCIÓN DE GESTIÓN DE USUARIOS
@@ -64,49 +63,39 @@ async function cargarUsuarios() {
             </li>`;
     });
     container.innerHTML += '</ul>';
-
-    // Asignamos el evento a los nuevos botones de borrar
     document.querySelectorAll('.delete-user-btn').forEach(button => {
         button.addEventListener('click', handleDeleteUser);
     });
 }
-
 async function handleCreateUser(event) {
     event.preventDefault();
     const aliasInput = document.getElementById('alias');
     const discordIdInput = document.getElementById('discord-id');
-    const userData = {
-        Alias: aliasInput.value,
-        Nombre_Usuario_Discord: discordIdInput.value
-    };
-    if (!userData.Nombre_Usuario_Discord) {
-        showNotification("El ID de Discord no puede estar vacío", "error");
+    const userData = { Alias: aliasInput.value, Nombre_Usuario_Discord: discordIdInput.value };
+    if (!userData.Alias || !userData.Nombre_Usuario_Discord) {
+        showNotification("Debes rellenar tanto el Alias como el ID de Discord.", "error");
         return;
     }
-
     const response = await fetch('/users/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
     });
-
     if (response.ok) {
         showNotification('¡Usuario añadido con éxito!', 'success');
-        discordIdInput.value = ''; // Limpia el campo
-        cargarUsuarios(); // Recargamos la lista
+        aliasInput.value = ''; discordIdInput.value = '';
+        cargarUsuarios();
     } else {
         showNotification('Error al añadir el usuario (quizás ya existe).', 'error');
     }
 }
-
 async function handleDeleteUser(event) {
     const userId = event.target.dataset.userId;
     if (!confirm(`¿Seguro que quieres borrar al usuario ${userId}?`)) return;
-
     const response = await fetch(`/users/${userId}`, { method: 'DELETE' });
     if (response.ok) {
         showNotification('Usuario borrado con éxito.', 'success');
-        cargarUsuarios(); // Recargamos la lista
+        cargarUsuarios();
     } else {
         const errorData = await response.json();
         showNotification(`Error: ${errorData.detail}`, 'error');
@@ -117,9 +106,10 @@ async function handleDeleteUser(event) {
 // SECCIÓN DE GESTIÓN DE MEMES
 // =================================================================================
 async function cargarMemesAdmin() {
+    const container = document.getElementById('memes-list-container');
+    if (!container) return;
     const response = await fetch('/memes/');
     const memes = await response.json();
-    const container = document.getElementById('memes-list-container');
     container.innerHTML = '';
     memes.forEach(meme => {
         const memeDiv = document.createElement('div');
@@ -164,7 +154,6 @@ async function handleDeleteMeme(event) {
     const button = event.target;
     const memeId = button.dataset.memeId;
     if (!confirm(`¿Seguro que quieres borrar el meme ${memeId}?`)) return;
-
     const response = await fetch(`/memes/${memeId}`, { method: 'DELETE' });
     if (response.ok) {
         showNotification(`Meme ${memeId} borrado.`, 'success');
@@ -173,7 +162,6 @@ async function handleDeleteMeme(event) {
         showNotification('Error al borrar el meme.', 'error');
     }
 }
-
 
 // =================================================================================
 // SECCIÓN DE GESTIÓN DE PARTIDOS
@@ -201,35 +189,33 @@ async function handleCreateMatch(event) {
         showNotification('Error al crear el partido.', 'error');
     }
 }
-
 async function cargarPartidosPorJugar() {
     try {
         const response = await fetch('/matches/');
         const partidos = await response.json();
         const container = document.getElementById('upcoming-matches-container');
         container.innerHTML = '';
-
-        const partidosPorJugar = partidos.filter(p => p.Estado === 'Por jugar');
-        if (partidosPorJugar.length === 0) {
-            container.innerHTML = '<p>No hay partidos pendientes de finalizar.</p>';
+        const partidosPendientes = partidos.filter(p => p.Estado === 'Por jugar' || p.Estado === 'Cerrado');
+        if (partidosPendientes.length === 0) {
+            container.innerHTML = '<p>No hay partidos pendientes.</p>';
             return;
         }
-
-        partidosPorJugar.forEach(partido => {
-            const plantillaLocal = plantillasEquipos[partido.Equipo_Local] || [];
-            const plantillaVisitante = plantillasEquipos[partido.Equipo_Visitante] || [];
-            const plantillaMadrid = plantillasEquipos["Real Madrid"] || [];
-
-            const goleadorOptions = plantillaMadrid.map(p => `<option value="${p}">${p}</option>`).join('');
-            const mvpOptions = [...new Set([...plantillaLocal, ...plantillaVisitante])].map(p => `<option value="${p}">${p}</option>`).join('');
-
+        partidosPendientes.forEach(partido => {
+            const plantillaLocal = (plantillasEquipos[partido.Equipo_Local] || []).map(p => p.nombre);
+            const plantillaVisitante = (plantillasEquipos[partido.Equipo_Visitante] || []).map(p => p.nombre);
+            const plantillaMadrid = (plantillasEquipos["Real Madrid"] || []).map(p => p.nombre);
+            const goleadorOptions = plantillaMadrid.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+            const mvpOptions = [...new Set([...plantillaLocal, ...plantillaVisitante])].map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+            const closeButtonHtml = partido.Estado === 'Por jugar' ? `<button class="close-pred-btn" data-match-id="${partido.ID_Partido}">Cerrar Preds</button>` : `<em>(Cerrado)</em>`;
             const matchDiv = document.createElement('div');
             matchDiv.className = 'upcoming-match-item';
             matchDiv.innerHTML = `
                 <div class="match-details">
                     <strong>${partido.Equipo_Local} vs ${partido.Equipo_Visitante}</strong>
-                    <button class="toggle-predictions-btn" data-match-id="${partido.ID_Partido}">Ver/Editar Predicciones</button>
-                    <button class="delete-match-btn" data-match-id="${partido.ID_Partido}">Borrar Partido</button>
+                    <span>(Jornada ${partido.Jornada_Numero})</span>
+                    ${closeButtonHtml}
+                    <button class="delete-match-btn" data-match-id="${partido.ID_Partido}">Borrar</button>
+                    <button class="toggle-predictions-btn" data-match-id="${partido.ID_Partido}">Ver/Editar</button>
                 </div>
                 <div class="predictions-list" id="predictions-for-${partido.ID_Partido}" style="display:none;"></div>
                 <div class="result-form" id="result-form-for-${partido.ID_Partido}">
@@ -242,20 +228,16 @@ async function cargarPartidosPorJugar() {
                 </div>`;
             container.appendChild(matchDiv);
         });
-
         document.querySelectorAll('.toggle-predictions-btn').forEach(button => button.addEventListener('click', handleTogglePredictions));
         document.querySelectorAll('.delete-match-btn').forEach(button => button.addEventListener('click', handleDeleteMatch));
         document.querySelectorAll('.finalize-btn').forEach(button => button.addEventListener('click', handleFinalizeMatch));
-    } catch (error) {
-        console.error("Error cargando partidos:", error);
-    }
+        document.querySelectorAll('.close-pred-btn').forEach(button => button.addEventListener('click', handleClosePredictions));
+    } catch (error) { console.error("Error cargando partidos:", error); }
 }
-
 async function handleDeleteMatch(event) {
     const button = event.target;
     const matchId = button.dataset.matchId;
     if (!confirm(`¿Estás seguro de que quieres borrar el partido ${matchId}?`)) return;
-
     const response = await fetch(`/matches/${matchId}`, { method: 'DELETE' });
     if (response.ok) {
         showNotification(`Partido ${matchId} borrado.`, 'success');
@@ -265,24 +247,20 @@ async function handleDeleteMatch(event) {
         showNotification(`Error al borrar: ${errorData.detail}`, 'error');
     }
 }
-
 async function handleFinalizeMatch(event) {
     const button = event.target;
     const matchId = button.dataset.matchId;
     const formDiv = button.closest('.result-form');
-    
     const resultData = {
         Goles_Local: parseInt(formDiv.querySelector('[name="goles_local"]').value),
         Goles_Visitante: parseInt(formDiv.querySelector('[name="goles_visitante"]').value),
         Goleador_Real: formDiv.querySelector('[name="goleador_real"]').value,
         MVP_Real: formDiv.querySelector('[name="mvp_real"]').value,
     };
-
     if (isNaN(resultData.Goles_Local) || isNaN(resultData.Goles_Visitante) || !resultData.Goleador_Real || !resultData.MVP_Real) {
         showNotification("Debes rellenar todos los campos del resultado.", 'error');
         return;
     }
-
     const response = await fetch(`/matches/${matchId}/finalize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,6 +273,19 @@ async function handleFinalizeMatch(event) {
         showNotification(`Error al finalizar el partido ${matchId}.`, 'error');
     }
 }
+async function handleClosePredictions(event) {
+    const button = event.target;
+    const matchId = button.dataset.matchId;
+    if (!confirm(`¿Seguro que quieres cerrar las predicciones para el partido ${matchId}?`)) return;
+    const response = await fetch(`/matches/${matchId}/close`, { method: 'POST' });
+    if (response.ok) {
+        showNotification(`Predicciones para el partido ${matchId} cerradas.`, 'success');
+        cargarPartidosPorJugar();
+    } else {
+        const errorData = await response.json();
+        showNotification(`Error al cerrar: ${errorData.detail}`, 'error');
+    }
+}
 
 
 // =================================================================================
@@ -304,17 +295,12 @@ async function handleTogglePredictions(event) {
     const button = event.target;
     const matchId = button.dataset.matchId;
     const container = document.getElementById(`predictions-for-${matchId}`);
-
     if (container.style.display === 'block') {
-        container.style.display = 'none';
-        container.innerHTML = '';
-        return;
+        container.style.display = 'none'; container.innerHTML = ''; return;
     }
-
     const response = await fetch(`/matches/${matchId}/predictions`);
     const predicciones = await response.json();
     container.innerHTML = '';
-
     if (predicciones.length === 0) {
         container.innerHTML = '<p><em>No hay predicciones para este partido.</em></p>';
     } else {
@@ -322,80 +308,56 @@ async function handleTogglePredictions(event) {
             const predDiv = document.createElement('div');
             predDiv.className = 'prediction-item';
             predDiv.id = `prediction-row-${pred.ID_Prediccion}`;
-            const alias = aliasUsuarios[pred.Nombre_Usuario_Discord] || pred.Nombre_Usuario_Discord;
-
-            // --- CÓDIGO CORREGIDO CON AMBOS BOTONES ---
             predDiv.innerHTML = `
-                <span><strong>${alias}</strong>: ${pred.Prediccion_Goles_Local}-${pred.Prediccion_Goles_Visitante} | G: ${pred.Prediccion_Goleador} | MVP: ${pred.Prediccion_MVP}</span>
+                <span><strong>${pred.Alias}</strong>: ${pred.Prediccion_Goles_Local}-${pred.Prediccion_Goles_Visitante} | G: ${pred.Prediccion_Goleador} | MVP: ${pred.Prediccion_MVP}</span>
                 <div class="prediction-actions">
                     <button class="edit-prediction-btn" data-prediction-id="${pred.ID_Prediccion}">Editar</button>
                     <button class="delete-prediction-btn" data-prediction-id="${pred.ID_Prediccion}">Borrar</button>
-                </div>
-            `;
+                </div>`;
             container.appendChild(predDiv);
         });
     }
     container.style.display = 'block';
-
-    // Asignamos los eventos a los nuevos botones
     document.querySelectorAll('.edit-prediction-btn').forEach(button => button.addEventListener('click', handleEditPrediction));
     document.querySelectorAll('.delete-prediction-btn').forEach(button => button.addEventListener('click', handleDeletePrediction));
 }
 
-async function handleEditPrediction(event) {
-    const predictionId = event.target.dataset.predictionId;
-
-    // Buscamos los datos completos de esta predicción
-    const response = await fetch(`/predictions/${predictionId}`); // Necesitaremos este endpoint
-    if (!response.ok) { showNotification("No se pudieron cargar los datos de la predicción.", "error"); return; }
-    const pred = await response.json();
-
-    // Buscamos los datos del partido para saber quiénes son los rivales
-    const matchResponse = await fetch(`/matches/${pred.ID_Partido}`);
-    const partido = await matchResponse.json();
-
-    // Rellenamos el formulario del modal
-    document.getElementById('edit-prediction-id').value = pred.ID_Prediccion;
-    document.getElementById('edit-goles-local').value = pred.Prediccion_Goles_Local;
-    document.getElementById('edit-goles-visitante').value = pred.Prediccion_Goles_Visitante;
-
-    // Rellenamos los desplegables
-    const goleadorSelect = document.getElementById('edit-goleador');
-    const mvpSelect = document.getElementById('edit-mvp');
-
-    const plantillaLocal = plantillasEquipos[partido.Equipo_Local] || [];
-    const plantillaVisitante = plantillasEquipos[partido.Equipo_Visitante] || [];
-    const plantillaMadrid = plantillasEquipos["Real Madrid"] || [];
-
-    goleadorSelect.innerHTML = `<option value="" disabled>Primer Goleador (RM)</option>` + plantillaMadrid.map(p => `<option value="${p}" ${p === pred.Prediccion_Goleador ? 'selected' : ''}>${p}</option>`).join('');
-    mvpSelect.innerHTML = `<option value="" disabled>MVP</option>` + [...plantillaLocal, ...plantillaVisitante].map(p => `<option value="${p}" ${p === pred.Prediccion_MVP ? 'selected' : ''}>${p}</option>`).join('');
-
-    // Mostramos el modal
-    document.getElementById('edit-modal').style.display = 'flex';
-}
-
-// AÑADE ESTAS DOS NUEVAS FUNCIONES A admin.js
-function closeEditModal() {
-    document.getElementById('edit-modal').style.display = 'none';
-}
-
-// --- FUNCIÓN NUEVA PARA BORRAR PREDICCIONES ---
 async function handleDeletePrediction(event) {
     const button = event.target;
     const predictionId = button.dataset.predictionId;
-
-    if (!confirm(`¿Estás seguro de que quieres borrar la predicción ${predictionId}?`)) {
-        return;
-    }
-
+    if (!confirm(`¿Estás seguro de que quieres borrar la predicción ${predictionId}?`)) return;
     const response = await fetch(`/predictions/${predictionId}`, { method: 'DELETE' });
-
     if (response.ok) {
         showNotification(`Predicción ${predictionId} borrada con éxito.`, 'success');
         button.closest('.prediction-item').remove();
     } else {
         showNotification('Error al borrar la predicción.', 'error');
     }
+}
+
+async function handleEditPrediction(event) {
+    const predictionId = event.target.dataset.predictionId;
+    const response = await fetch(`/predictions/${predictionId}`);
+    if (!response.ok) { showNotification("No se pudieron cargar los datos de la predicción.", "error"); return; }
+    const pred = await response.json();
+    const matchResponse = await fetch(`/matches/${pred.ID_Partido}`);
+    const partido = await matchResponse.json();
+    if (!partido) return;
+    document.getElementById('edit-prediction-id').value = pred.ID_Prediccion;
+    document.getElementById('edit-goles-local').value = pred.Prediccion_Goles_Local;
+    document.getElementById('edit-goles-visitante').value = pred.Prediccion_Goles_Visitante;
+    const goleadorSelect = document.getElementById('edit-goleador');
+    const mvpSelect = document.getElementById('edit-mvp');
+    const plantillaLocal = (plantillasEquipos[partido.Equipo_Local] || []).map(p => p.nombre);
+    const plantillaVisitante = (plantillasEquipos[partido.Equipo_Visitante] || []).map(p => p.nombre);
+    const plantillaMadrid = (plantillasEquipos["Real Madrid"] || []).map(p => p.nombre);
+    goleadorSelect.innerHTML = `<option value="" disabled>Goleador (RM)</option>` + plantillaMadrid.map(n => `<option value="${n}" ${n === pred.Prediccion_Goleador ? 'selected' : ''}>${n}</option>`).join('');
+    mvpSelect.innerHTML = `<option value="" disabled>MVP</option>` + [...new Set([...plantillaLocal, ...plantillaVisitante])].map(n => `<option value="${n}" ${n === pred.Prediccion_MVP ? 'selected' : ''}>${n}</option>`).join('');
+    document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').style.display = 'none';
 }
 
 async function handleUpdatePrediction(event) {
@@ -407,21 +369,17 @@ async function handleUpdatePrediction(event) {
         Prediccion_Goleador: document.getElementById('edit-goleador').value,
         Prediccion_MVP: document.getElementById('edit-mvp').value
     };
-
     const response = await fetch(`/predictions/${predictionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData)
     });
-
     if (response.ok) {
         const data = await response.json();
         showNotification('¡Predicción actualizada!', 'success');
-        // Actualizamos la vista sin recargar
         const row = document.getElementById(`prediction-row-${data.ID_Prediccion}`);
-        if (row) {
-            const alias = aliasUsuarios[data.Nombre_Usuario_Discord] || data.Nombre_Usuario_Discord;
-            row.querySelector('span').innerHTML = `<strong>${alias}</strong>: ${data.Prediccion_Goles_Local}-${data.Prediccion_Goles_Visitante} | G: ${data.Prediccion_Goleador} | MVP: ${data.Prediccion_MVP}`;
+        if(row) {
+            row.querySelector('span').innerHTML = `<strong>${data.Alias}</strong>: ${data.Prediccion_Goles_Local}-${data.Prediccion_Goles_Visitante} | G: ${data.Prediccion_Goleador} | MVP: ${data.Prediccion_MVP}`;
         }
         closeEditModal();
     } else {
@@ -431,16 +389,103 @@ async function handleUpdatePrediction(event) {
 
 
 // =================================================================================
-// FUNCIÓN DE NOTIFICACIONES REUTILIZABLE
+// SECCIÓN DE FINALIZACIÓN DE TEMPORADA
 // =================================================================================
+
+function populateFinalizeForm() {
+    // 👇 LOG de depuración para ver si encuentra los selects y los equipos
+    console.log('DEBUG: team-selectors:', document.querySelectorAll('.team-selector'), equiposLaLiga);
+
+    // 1. Rellena los desplegables de EQUIPOS principales
+    populateSelect(document.querySelectorAll('#res-campeon, .res-ucl, .res-el, #res-conference, .res-descenso'), equiposLaLiga, 'Selecciona un equipo');
+
+    // 2. Activa la lógica de filtrado para los JUGADORES
+    const form = document.getElementById('finalize-season-form');
+    if (!form) return;
+    
+    const teamSelectors = form.querySelectorAll('.team-selector');
+    teamSelectors.forEach(teamSelector => {
+        populateSelect(teamSelector, equiposLaLiga, "Selecciona un equipo");
+
+        teamSelector.addEventListener('change', () => {
+            const selectedTeam = teamSelector.value;
+            const playerSelector = document.getElementById(teamSelector.dataset.playerTarget);
+            const filterType = teamSelector.dataset.filter;
+            let playersToShow = plantillasEquipos[selectedTeam] || [];
+
+            if (filterType === 'spanish') {
+                playersToShow = playersToShow.filter(player => player.nacionalidad === 'España');
+            } else if (filterType === 'goalkeeper') {
+                playersToShow = playersToShow.filter(player => player.posicion === 'POR');
+            }
+            
+            populateSelect(playerSelector, playersToShow, "Selecciona un jugador");
+        });
+    });
+}
+async function handleFinalizeSeason(event) {
+    event.preventDefault();
+    if (!confirm("¿ESTÁS SEGURO? Esta acción calculará y sumará todos los puntos de temporada. No se puede deshacer.")) return;
+
+    const resultData = {
+        Competicion: "LaLiga",
+        Campeon: document.getElementById('res-campeon').value,
+        Clasificados_UCL: Array.from(document.querySelectorAll('.res-ucl')).map(s => s.value),
+        Clasificados_EL: Array.from(document.querySelectorAll('.res-el')).map(s => s.value),
+        Clasificado_Conference: document.getElementById('res-conference').value,
+        Descensos: Array.from(document.querySelectorAll('.res-descenso')).map(s => s.value),
+        Pichichi: document.getElementById('res-pichichi').value,
+        Max_Asistente: document.getElementById('res-max-asistente').value,
+        Zamora: document.getElementById('res-zamora').value,
+        Zarra: document.getElementById('res-zarra').value,
+        MVP: document.getElementById('res-mvp').value
+    };
+
+    try {
+        const response = await fetch('/season-predictions/finalize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(resultData)
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail);
+        }
+        const successData = await response.json();
+        showNotification(successData.detail, 'success');
+    } catch (error) {
+        showNotification(`Error: ${error.message}`, 'error');
+    }
+}
+
+// --- FUNCIÓN DE AYUDA Y NOTIFICACIONES ---
+function populateSelect(elements, options, placeholder) {
+    // Permite pasar un solo select o un NodeList
+    if (!elements) return;
+    const selectList = (elements instanceof NodeList || Array.isArray(elements)) ? elements : [elements];
+    selectList.forEach(select => {
+        if (!select) return;
+        select.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+        options.forEach(optionItem => {
+            const option = document.createElement('option');
+            if (typeof optionItem === 'object' && optionItem !== null) {
+                option.value = optionItem.nombre;
+                option.textContent = optionItem.nombre;
+            } else {
+                option.value = optionItem;
+                option.textContent = optionItem;
+            }
+            select.appendChild(option);
+        });
+    });
+}
+
 function showNotification(message, type = 'success') {
     const container = document.getElementById('notification-container');
     if (!container) return;
     container.textContent = message;
-    container.className = `notification ${type}`; // Usa un nombre de clase base
+    container.className = 'notification';
     container.classList.add(type);
     container.classList.add('show');
-    setTimeout(() => {
-        container.classList.remove('show');
-    }, 3000);
+    setTimeout(() => { container.classList.remove('show'); }, 3000);
 }

@@ -13,12 +13,19 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.Partido])
-def get_matches(estado: Optional[str] = None, db: Session = Depends(get_db)):
+def get_matches(estado: Optional[str] = None, sort_order: str = "desc", db: Session = Depends(get_db)):
     query = db.query(models.Partido)
     if estado:
         query = query.filter(models.Partido.Estado == estado)
-    # Añadimos un orden para que los más recientes salgan primero
-    matches = query.order_by(models.Partido.Fecha_Hora_Partido.desc()).all()
+
+    # Lógica de ordenación
+    if sort_order == "asc":
+        # Orden ascendente (del más antiguo/próximo al más lejano)
+        matches = query.order_by(models.Partido.Fecha_Hora_Partido.asc()).all()
+    else:
+        # Orden descendente (del más reciente al más antiguo)
+        matches = query.order_by(models.Partido.Fecha_Hora_Partido.desc()).all()
+
     return matches
 
 @router.post("/", response_model=schemas.Partido)
@@ -93,14 +100,36 @@ def finalize_match(match_id: int, resultados: schemas.PartidoFinalizar, db: Sess
 
 @router.get("/{match_id}/predictions", response_model=List[schemas.Prediccion])
 def get_predictions_for_match(match_id: int, db: Session = Depends(get_db)):
-    predictions_with_users = (
-        db.query(models.Prediccion, models.Usuario.Nombre_Usuario_Discord)
+    results_from_db = (
+        db.query(models.Prediccion, models.Usuario.Alias, models.Usuario.Nombre_Usuario_Discord)
         .join(models.Usuario, models.Prediccion.ID_Usuario == models.Usuario.ID_Usuario)
         .filter(models.Prediccion.ID_Partido == match_id)
         .all()
     )
+
+    # Unimos los datos para que coincidan con el esquema
     results = []
-    for pred, discord_name in predictions_with_users:
-        pred.Nombre_Usuario_Discord = discord_name
-        results.append(pred)
+    for pred, alias, discord_name in results_from_db:
+        # Creamos un diccionario a partir del objeto de predicción
+        pred_data = {c.name: getattr(pred, c.name) for c in pred.__table__.columns}
+        # Añadimos los datos del usuario que faltaban
+        pred_data["Alias"] = alias
+        pred_data["Nombre_Usuario_Discord"] = discord_name
+        results.append(pred_data)
+
     return results
+
+# --- FUNCIÓN NUEVA PARA CERRAR PREDICCIONES ---
+@router.post("/{match_id}/close", response_model=schemas.Partido)
+def close_predictions_for_match(match_id: int, db: Session = Depends(get_db)):
+    db_match = db.query(models.Partido).filter(models.Partido.ID_Partido == match_id).first()
+    if not db_match:
+        raise HTTPException(status_code=404, detail="Partido no encontrado")
+
+    if db_match.Estado != "Por jugar":
+        raise HTTPException(status_code=400, detail="Solo se pueden cerrar partidos que están 'Por jugar'")
+
+    db_match.Estado = "Cerrado"
+    db.commit()
+    db.refresh(db_match)
+    return db_match

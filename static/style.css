@@ -177,7 +177,7 @@ button:hover, #theme-toggle:hover {
     display: inline-block;
     background-color: var(--color-primary);
     color: var(--color-background);
-    padding: 15px 30px;
+    padding: 15px 20px;
     text-decoration: none;
     border-radius: 8px;
     font-weight: bold;
@@ -640,4 +640,67 @@ body.light-mode #theme-toggle .moon {
     font-size: 0.8em;
     padding: 5px 10px;
     margin-top: 0;
+}
+
+.close-pred-btn {
+    background-color: #FFC107; /* Amarillo */
+    color: #121212;
+    font-size: 0.8em;
+    padding: 5px 10px;
+    margin-left: 15px;
+    margin-top: 0;
+}
+
+.form-row-stacked {
+    margin-bottom: 20px;
+    text-align: left;
+}
+.form-row-stacked label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+/* El contenedor que envuelve a los dos botones */
+#predicciones {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* <-- Aumenta este número para más separación */
+}
+
+/* El estilo de los dos botones grandes */
+.button-link {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    padding: 10px 20px; /* <-- Reduce estos números para hacerlos más pequeños */
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: transform 0.2s ease-in-out;
+}
+
+.button-link:hover {
+    transform: scale(1.05);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.player-selector-group {
+    display: flex;
+    gap: 10px;
+}
+.player-selector-group .team-selector {
+    flex-basis: 40%;
+}
+.player-selector-group .player-selector {
+    flex-basis: 60%;
 }

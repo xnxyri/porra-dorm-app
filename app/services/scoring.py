@@ -1,4 +1,5 @@
 from ..db import models
+from .. import schemas
 
 # --- REGLAS DE PUNTUACIÓN ---
 PUNTOS_1X2 = 50
@@ -119,3 +120,46 @@ def actualizar_racha_y_bonus(usuario: models.Usuario, acertado_1x2: bool, jornad
         usuario.Win_Streak_Consecutivos = 0
 
     return puntos_bonus
+
+def calcular_puntos_temporada(prediccion: models.PrediccionTemporada, resultados: schemas.ResultadoTemporada):
+    puntos = 0
+
+    # Puntos por Campeón
+    if prediccion.Campeon == resultados.Campeon:
+        puntos += 250
+
+    # Puntos por UCL (cuenta cuántos aciertos hay)
+    pred_ucl = set(prediccion.Clasificados_UCL.split(','))
+    res_ucl = set(resultados.Clasificados_UCL)
+    aciertos_ucl = len(pred_ucl.intersection(res_ucl))
+    puntos += aciertos_ucl * 25
+
+    # Puntos por Europa League
+    pred_el = set(prediccion.Clasificados_EL.split(','))
+    res_el = set(resultados.Clasificados_EL)
+    aciertos_el = len(pred_el.intersection(res_el))
+    puntos += aciertos_el * 30
+
+    # Puntos por Conference League
+    if prediccion.Clasificado_Conference == resultados.Clasificado_Conference:
+        puntos += 35
+
+    # Puntos por Descenso
+    pred_desc = set(prediccion.Descensos.split(','))
+    res_desc = set(resultados.Descensos)
+    aciertos_desc = len(pred_desc.intersection(res_desc))
+    puntos += aciertos_desc * 30
+
+    # Puntos por premios individuales
+    if prediccion.Pichichi == resultados.Pichichi:
+        puntos += 75
+    if prediccion.Max_Asistente == resultados.Max_Asistente:
+        puntos += 75
+    if prediccion.Zamora == resultados.Zamora:
+        puntos += 75
+    if prediccion.Zarra == resultados.Zarra:
+        puntos += 75
+    if prediccion.MVP and prediccion.MVP == resultados.MVP:
+        puntos += 75
+
+    return puntos
