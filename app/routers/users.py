@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from pydantic import BaseModel # <-- FALTABA ESTA IMPORTACIÓN
 from .. import schemas
 from ..db import models
 from ..db.database import get_db
@@ -9,6 +10,11 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
+
+# --- FALTABA ESTA CLASE ---
+class ScoreAdjustment(BaseModel):
+    puntos: int
+# -----------------------------
 
 @router.post("/", response_model=schemas.Usuario)
 def create_user(user: schemas.UsuarioCreate, db: Session = Depends(get_db)):
@@ -39,3 +45,14 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return {"ok": True}
+
+@router.post("/{user_id}/adjust-score", response_model=schemas.Usuario)
+def adjust_user_score(user_id: int, adjustment: ScoreAdjustment, db: Session = Depends(get_db)):
+    db_user = db.query(models.Usuario).filter(models.Usuario.ID_Usuario == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    db_user.Puntuacion_Total += adjustment.puntos
+    db.commit()
+    db.refresh(db_user)
+    return db_user

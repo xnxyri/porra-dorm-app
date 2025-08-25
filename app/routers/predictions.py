@@ -2,9 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
+from pydantic import BaseModel
 from .. import schemas
 from ..db import models
 from ..db.database import get_db
+
+class PointsAdjustment(BaseModel):
+    puntos_obtenidos: int
 
 router = APIRouter(
     prefix="/predictions",
@@ -86,3 +90,29 @@ def delete_prediction(prediction_id: int, db: Session = Depends(get_db)):
     db.delete(db_prediction)
     db.commit()
     return {"ok": True}
+
+@router.put("/{prediction_id}/adjust-points", response_model=schemas.Prediccion)
+def adjust_prediction_points(
+    prediction_id: int,
+    adjustment: PointsAdjustment,
+    db: Session = Depends(get_db)
+):
+    db_prediction = db.query(models.Prediccion).filter(models.Prediccion.ID_Prediccion == prediction_id).first()
+    if not db_prediction:
+        raise HTTPException(status_code=404, detail="Predicción no encontrada")
+
+    # Calculamos la diferencia entre los puntos nuevos y los antiguos
+    diferencia = adjustment.puntos_obtenidos - db_prediction.Puntos_Obtenidos
+
+    # Actualizamos los puntos de la predicción
+    db_prediction.Puntos_Obtenidos = adjustment.puntos_obtenidos
+
+    # Buscamos al usuario y ajustamos su puntuación total con esa diferencia
+    usuario = db.query(models.Usuario).filter(models.Usuario.ID_Usuario == db_prediction.ID_Usuario).first()
+    if usuario:
+        usuario.Puntuacion_Total += diferencia
+
+    db.commit()
+
+    # Devolvemos la predicción actualizada usando la función que ya teníamos
+    return get_prediction(prediction_id, db)

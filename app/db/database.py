@@ -7,7 +7,13 @@ from sqlalchemy.ext.declarative import declarative_base
 # Si no la encuentra, usará nuestra base de datos local sqlite
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./porra_dorm.db")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# --- LÓGICA DE CONEXIÓN CORREGIDA ---
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True, # Comprueba si la conexión está viva antes de usarla
+    pool_recycle=300    # Recicla conexiones que lleven más de 5 minutos inactivas
+)
+# ------------------------------------
 
 # En PostgreSQL, no necesitamos el argumento 'check_same_thread'
 # engine = create_engine(

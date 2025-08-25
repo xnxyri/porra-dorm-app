@@ -9,6 +9,7 @@ PUNTOS_DIFERENCIA = 10
 PUNTOS_GOLEADOR = 20
 PUNTOS_MVP = 30
 BONUS_PLENO = 15
+BONUS_TENDENCIA = 10
 
 def calcular_puntos(prediccion: models.Prediccion, partido: models.Partido):
     """
@@ -85,8 +86,6 @@ def calcular_puntos(prediccion: models.Prediccion, partido: models.Partido):
         if "Goles Rival" in aciertos: puntos_booster += PUNTOS_GOLES_RIVAL
         if "Diferencia Goles" in aciertos: puntos_booster += PUNTOS_DIFERENCIA
         puntos_totales += puntos_booster
-
-    return puntos_totales, acierto_1x2
 
     # Multiplicador por Partidazo DORM
     if partido.Es_Partidazo:

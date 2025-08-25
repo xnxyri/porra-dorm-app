@@ -704,3 +704,27 @@ body.light-mode #theme-toggle .moon {
 .player-selector-group .player-selector {
     flex-basis: 60%;
 }
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.user-actions {
+    display: flex;
+    gap: 5px;
+}
+.adjust-score-btn {
+    background-color: #03A9F4; /* Azul */
+    font-size: 0.8em;
+    padding: 5px 10px;
+    margin-top: 0;
+}
+
+.adjust-points-btn {
+    background-color: #4CAF50; /* Verde */
+    font-size: 0.8em;
+    padding: 5px 10px;
+    margin-top: 0;
+}

@@ -1,6 +1,5 @@
 // Listener principal que se ejecuta cuando carga la página de admin
 document.addEventListener('DOMContentLoaded', () => {
-    // Asignación de eventos a los formularios
     const loginForm = document.getElementById('login-form');
     if (loginForm) loginForm.addEventListener('submit', handleLogin);
 
@@ -37,6 +36,7 @@ async function handleLogin(event) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-panel-section').style.display = 'flex';
             cargarUsuarios();
+            cargarMemesAdmin();
             cargarPartidosPorJugar();
             populateFinalizeForm();
         } else {
@@ -47,26 +47,32 @@ async function handleLogin(event) {
     }
 }
 
+
 // =================================================================================
 // SECCIÓN DE GESTIÓN DE USUARIOS
 // =================================================================================
 async function cargarUsuarios() {
-    const response = await fetch('/users/');
-    const usuarios = await response.json();
-    const container = document.getElementById('users-list-container');
-    container.innerHTML = '<ul>';
-    usuarios.forEach(user => {
-        container.innerHTML += `
-            <li class="user-item">
-                <span>${user.Alias} (${user.Nombre_Usuario_Discord})</span>
-                <button class="delete-user-btn" data-user-id="${user.ID_Usuario}">Borrar</button>
-            </li>`;
-    });
-    container.innerHTML += '</ul>';
-    document.querySelectorAll('.delete-user-btn').forEach(button => {
-        button.addEventListener('click', handleDeleteUser);
-    });
+    try {
+        const response = await fetch('/users/');
+        const usuarios = await response.json();
+        const container = document.getElementById('users-list-container');
+        container.innerHTML = '<ul>';
+        usuarios.forEach(user => {
+            container.innerHTML += `
+                <li class="user-item">
+                    <span>${user.Alias} (${user.Nombre_Usuario_Discord})</span>
+                    <button class="delete-user-btn" data-user-id="${user.ID_Usuario}">Borrar</button>
+                </li>`;
+        });
+        container.innerHTML += '</ul>';
+        document.querySelectorAll('.delete-user-btn').forEach(button => {
+            button.addEventListener('click', handleDeleteUser);
+        });
+    } catch (error) {
+        console.error("Error al cargar usuarios:", error);
+    }
 }
+
 async function handleCreateUser(event) {
     event.preventDefault();
     const aliasInput = document.getElementById('alias');
@@ -89,6 +95,7 @@ async function handleCreateUser(event) {
         showNotification('Error al añadir el usuario (quizás ya existe).', 'error');
     }
 }
+
 async function handleDeleteUser(event) {
     const userId = event.target.dataset.userId;
     if (!confirm(`¿Seguro que quieres borrar al usuario ${userId}?`)) return;
@@ -102,28 +109,33 @@ async function handleDeleteUser(event) {
     }
 }
 
+
 // =================================================================================
 // SECCIÓN DE GESTIÓN DE MEMES
 // =================================================================================
 async function cargarMemesAdmin() {
     const container = document.getElementById('memes-list-container');
     if (!container) return;
-    const response = await fetch('/memes/');
-    const memes = await response.json();
-    container.innerHTML = '';
-    memes.forEach(meme => {
-        const memeDiv = document.createElement('div');
-        memeDiv.className = 'meme-item';
-        memeDiv.innerHTML = `
-            <img src="${meme.URL_Imagen}" alt="${meme.Descripcion}" class="meme-preview">
-            <span>${meme.Descripcion || 'Sin descripción'}</span>
-            <button class="delete-meme-btn" data-meme-id="${meme.ID_Meme}">Borrar</button>
-        `;
-        container.appendChild(memeDiv);
-    });
-    document.querySelectorAll('.delete-meme-btn').forEach(button => {
-        button.addEventListener('click', handleDeleteMeme);
-    });
+    try {
+        const response = await fetch('/memes/');
+        const memes = await response.json();
+        container.innerHTML = '';
+        memes.forEach(meme => {
+            const memeDiv = document.createElement('div');
+            memeDiv.className = 'meme-item';
+            memeDiv.innerHTML = `
+                <img src="${meme.URL_Imagen}" alt="${meme.Descripcion}" class="meme-preview">
+                <span>${meme.Descripcion || 'Sin descripción'}</span>
+                <button class="delete-meme-btn" data-meme-id="${meme.ID_Meme}">Borrar</button>
+            `;
+            container.appendChild(memeDiv);
+        });
+        document.querySelectorAll('.delete-meme-btn').forEach(button => {
+            button.addEventListener('click', handleDeleteMeme);
+        });
+    } catch (error) {
+        console.error("Error al cargar memes:", error);
+    }
 }
 
 async function handleCreateMeme(event) {
@@ -163,6 +175,7 @@ async function handleDeleteMeme(event) {
     }
 }
 
+
 // =================================================================================
 // SECCIÓN DE GESTIÓN DE PARTIDOS
 // =================================================================================
@@ -189,51 +202,87 @@ async function handleCreateMatch(event) {
         showNotification('Error al crear el partido.', 'error');
     }
 }
+
 async function cargarPartidosPorJugar() {
     try {
         const response = await fetch('/matches/');
-        const partidos = await response.json();
-        const container = document.getElementById('upcoming-matches-container');
-        container.innerHTML = '';
-        const partidosPendientes = partidos.filter(p => p.Estado === 'Por jugar' || p.Estado === 'Cerrado');
+        const todosLosPartidos = await response.json();
+
+        // Buscamos los dos contenedores en el HTML
+        const pendingContainer = document.getElementById('upcoming-matches-container');
+        const finishedContainer = document.getElementById('finished-matches-container');
+        pendingContainer.innerHTML = '';
+        finishedContainer.innerHTML = '';
+
+        // Filtramos los partidos en dos listas separadas
+        const partidosPendientes = todosLosPartidos.filter(p => p.Estado === 'Por jugar' || p.Estado === 'Cerrado');
+        const partidosFinalizados = todosLosPartidos.filter(p => p.Estado === 'Finalizado');
+
+        // --- Rellenamos la lista de PARTIDOS PENDIENTES ---
         if (partidosPendientes.length === 0) {
-            container.innerHTML = '<p>No hay partidos pendientes.</p>';
-            return;
+            pendingContainer.innerHTML = '<p>No hay partidos pendientes.</p>';
+        } else {
+            partidosPendientes.forEach(partido => {
+                const plantillaLocal = (plantillasEquipos[partido.Equipo_Local] || []).map(p => p.nombre);
+                const plantillaVisitante = (plantillasEquipos[partido.Equipo_Visitante] || []).map(p => p.nombre);
+                const plantillaMadrid = (plantillasEquipos["Real Madrid"] || []).map(p => p.nombre);
+                const goleadorOptions = plantillaMadrid.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+                const mvpOptions = [...new Set([...plantillaLocal, ...plantillaVisitante])].map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
+                const closeButtonHtml = partido.Estado === 'Por jugar' ? `<button class="close-pred-btn" data-match-id="${partido.ID_Partido}">Cerrar Preds</button>` : `<em>(Cerrado)</em>`;
+                
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'upcoming-match-item';
+                matchDiv.innerHTML = `
+                    <div class="match-details">
+                        <strong>${partido.Equipo_Local} vs ${partido.Equipo_Visitante}</strong>
+                        <span>(Jornada ${partido.Jornada_Numero})</span>
+                        ${closeButtonHtml}
+                        <button class="delete-match-btn" data-match-id="${partido.ID_Partido}">Borrar</button>
+                        <button class="toggle-predictions-btn" data-match-id="${partido.ID_Partido}">Ver/Editar</button>
+                    </div>
+                    <div class="predictions-list" id="predictions-for-${partido.ID_Partido}" style="display:none;"></div>
+                    <div class="result-form" id="result-form-for-${partido.ID_Partido}">
+                        <p><strong>Finalizar Partido:</strong></p>
+                        <input type="number" placeholder="G. Local" name="goles_local" required>
+                        <input type="number" placeholder="G. Visit." name="goles_visitante" required>
+                        <select name="goleador_real" required><option value="" disabled selected>Goleador</option>${goleadorOptions}</select>
+                        <select name="mvp_real" required><option value="" disabled selected>MVP</option>${mvpOptions}</select>
+                        <button class="finalize-btn" data-match-id="${partido.ID_Partido}">Finalizar</button>
+                    </div>`;
+                pendingContainer.appendChild(matchDiv);
+            });
         }
-        partidosPendientes.forEach(partido => {
-            const plantillaLocal = (plantillasEquipos[partido.Equipo_Local] || []).map(p => p.nombre);
-            const plantillaVisitante = (plantillasEquipos[partido.Equipo_Visitante] || []).map(p => p.nombre);
-            const plantillaMadrid = (plantillasEquipos["Real Madrid"] || []).map(p => p.nombre);
-            const goleadorOptions = plantillaMadrid.map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
-            const mvpOptions = [...new Set([...plantillaLocal, ...plantillaVisitante])].map(nombre => `<option value="${nombre}">${nombre}</option>`).join('');
-            const closeButtonHtml = partido.Estado === 'Por jugar' ? `<button class="close-pred-btn" data-match-id="${partido.ID_Partido}">Cerrar Preds</button>` : `<em>(Cerrado)</em>`;
-            const matchDiv = document.createElement('div');
-            matchDiv.className = 'upcoming-match-item';
-            matchDiv.innerHTML = `
-                <div class="match-details">
-                    <strong>${partido.Equipo_Local} vs ${partido.Equipo_Visitante}</strong>
-                    <span>(Jornada ${partido.Jornada_Numero})</span>
-                    ${closeButtonHtml}
-                    <button class="delete-match-btn" data-match-id="${partido.ID_Partido}">Borrar</button>
-                    <button class="toggle-predictions-btn" data-match-id="${partido.ID_Partido}">Ver/Editar</button>
-                </div>
-                <div class="predictions-list" id="predictions-for-${partido.ID_Partido}" style="display:none;"></div>
-                <div class="result-form" id="result-form-for-${partido.ID_Partido}">
-                    <p><strong>Finalizar Partido:</strong></p>
-                    <input type="number" placeholder="G. Local" name="goles_local" required>
-                    <input type="number" placeholder="G. Visit." name="goles_visitante" required>
-                    <select name="goleador_real" required><option value="" disabled selected>Goleador</option>${goleadorOptions}</select>
-                    <select name="mvp_real" required><option value="" disabled selected>MVP</option>${mvpOptions}</select>
-                    <button class="finalize-btn" data-match-id="${partido.ID_Partido}">Finalizar</button>
-                </div>`;
-            container.appendChild(matchDiv);
-        });
+
+        // --- Rellenamos la lista de HISTORIAL DE PARTIDOS FINALIZADOS ---
+        if (partidosFinalizados.length === 0) {
+            finishedContainer.innerHTML = '<p>No hay partidos finalizados.</p>';
+        } else {
+            partidosFinalizados.forEach(partido => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'upcoming-match-item';
+                matchDiv.innerHTML = `
+                    <div class="match-details">
+                        <strong>${partido.Equipo_Local} vs ${partido.Equipo_Visitante}</strong>
+                        <span>(${partido.Goles_Local} - ${partido.Goles_Visitante})</span>
+                        <button class="toggle-predictions-btn" data-match-id="${partido.ID_Partido}">Ver/Ajustar</button>
+                    </div>
+                    <div class="predictions-list" id="predictions-for-${partido.ID_Partido}" style="display:none;"></div>
+                `;
+                finishedContainer.appendChild(matchDiv);
+            });
+        }
+        
+        // Volvemos a asignar los eventos a todos los botones de ambas listas
         document.querySelectorAll('.toggle-predictions-btn').forEach(button => button.addEventListener('click', handleTogglePredictions));
         document.querySelectorAll('.delete-match-btn').forEach(button => button.addEventListener('click', handleDeleteMatch));
         document.querySelectorAll('.finalize-btn').forEach(button => button.addEventListener('click', handleFinalizeMatch));
         document.querySelectorAll('.close-pred-btn').forEach(button => button.addEventListener('click', handleClosePredictions));
-    } catch (error) { console.error("Error cargando partidos:", error); }
+
+    } catch (error) { 
+        console.error("Error cargando partidos:", error); 
+    }
 }
+
 async function handleDeleteMatch(event) {
     const button = event.target;
     const matchId = button.dataset.matchId;
@@ -247,6 +296,7 @@ async function handleDeleteMatch(event) {
         showNotification(`Error al borrar: ${errorData.detail}`, 'error');
     }
 }
+
 async function handleFinalizeMatch(event) {
     const button = event.target;
     const matchId = button.dataset.matchId;
@@ -273,6 +323,7 @@ async function handleFinalizeMatch(event) {
         showNotification(`Error al finalizar el partido ${matchId}.`, 'error');
     }
 }
+
 async function handleClosePredictions(event) {
     const button = event.target;
     const matchId = button.dataset.matchId;
@@ -286,7 +337,6 @@ async function handleClosePredictions(event) {
         showNotification(`Error al cerrar: ${errorData.detail}`, 'error');
     }
 }
-
 
 // =================================================================================
 // SECCIÓN DE GESTIÓN DE PREDICCIONES (DENTRO DE PARTIDOS)
@@ -309,8 +359,9 @@ async function handleTogglePredictions(event) {
             predDiv.className = 'prediction-item';
             predDiv.id = `prediction-row-${pred.ID_Prediccion}`;
             predDiv.innerHTML = `
-                <span><strong>${pred.Alias}</strong>: ${pred.Prediccion_Goles_Local}-${pred.Prediccion_Goles_Visitante} | G: ${pred.Prediccion_Goleador} | MVP: ${pred.Prediccion_MVP}</span>
+                <span><strong>${pred.Alias}</strong>: ${pred.Prediccion_Goles_Local}-${pred.Prediccion_Goles_Visitante} | Puntos: <strong>${pred.Puntos_Obtenidos}</strong></span>
                 <div class="prediction-actions">
+                    <button class="adjust-points-btn" data-prediction-id="${pred.ID_Prediccion}" data-current-points="${pred.Puntos_Obtenidos}">Ajustar Pts</button>
                     <button class="edit-prediction-btn" data-prediction-id="${pred.ID_Prediccion}">Editar</button>
                     <button class="delete-prediction-btn" data-prediction-id="${pred.ID_Prediccion}">Borrar</button>
                 </div>`;
@@ -320,6 +371,7 @@ async function handleTogglePredictions(event) {
     container.style.display = 'block';
     document.querySelectorAll('.edit-prediction-btn').forEach(button => button.addEventListener('click', handleEditPrediction));
     document.querySelectorAll('.delete-prediction-btn').forEach(button => button.addEventListener('click', handleDeletePrediction));
+    document.querySelectorAll('.adjust-points-btn').forEach(button => button.addEventListener('click', handleAdjustPoints));
 }
 
 async function handleDeletePrediction(event) {
@@ -387,81 +439,10 @@ async function handleUpdatePrediction(event) {
     }
 }
 
-
 // =================================================================================
 // SECCIÓN DE FINALIZACIÓN DE TEMPORADA
 // =================================================================================
-
-function populateFinalizeForm() {
-    // 👇 LOG de depuración para ver si encuentra los selects y los equipos
-    console.log('DEBUG: team-selectors:', document.querySelectorAll('.team-selector'), equiposLaLiga);
-
-    // 1. Rellena los desplegables de EQUIPOS principales
-    populateSelect(document.querySelectorAll('#res-campeon, .res-ucl, .res-el, #res-conference, .res-descenso'), equiposLaLiga, 'Selecciona un equipo');
-
-    // 2. Activa la lógica de filtrado para los JUGADORES
-    const form = document.getElementById('finalize-season-form');
-    if (!form) return;
-    
-    const teamSelectors = form.querySelectorAll('.team-selector');
-    teamSelectors.forEach(teamSelector => {
-        populateSelect(teamSelector, equiposLaLiga, "Selecciona un equipo");
-
-        teamSelector.addEventListener('change', () => {
-            const selectedTeam = teamSelector.value;
-            const playerSelector = document.getElementById(teamSelector.dataset.playerTarget);
-            const filterType = teamSelector.dataset.filter;
-            let playersToShow = plantillasEquipos[selectedTeam] || [];
-
-            if (filterType === 'spanish') {
-                playersToShow = playersToShow.filter(player => player.nacionalidad === 'España');
-            } else if (filterType === 'goalkeeper') {
-                playersToShow = playersToShow.filter(player => player.posicion === 'POR');
-            }
-            
-            populateSelect(playerSelector, playersToShow, "Selecciona un jugador");
-        });
-    });
-}
-async function handleFinalizeSeason(event) {
-    event.preventDefault();
-    if (!confirm("¿ESTÁS SEGURO? Esta acción calculará y sumará todos los puntos de temporada. No se puede deshacer.")) return;
-
-    const resultData = {
-        Competicion: "LaLiga",
-        Campeon: document.getElementById('res-campeon').value,
-        Clasificados_UCL: Array.from(document.querySelectorAll('.res-ucl')).map(s => s.value),
-        Clasificados_EL: Array.from(document.querySelectorAll('.res-el')).map(s => s.value),
-        Clasificado_Conference: document.getElementById('res-conference').value,
-        Descensos: Array.from(document.querySelectorAll('.res-descenso')).map(s => s.value),
-        Pichichi: document.getElementById('res-pichichi').value,
-        Max_Asistente: document.getElementById('res-max-asistente').value,
-        Zamora: document.getElementById('res-zamora').value,
-        Zarra: document.getElementById('res-zarra').value,
-        MVP: document.getElementById('res-mvp').value
-    };
-
-    try {
-        const response = await fetch('/season-predictions/finalize', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(resultData)
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail);
-        }
-        const successData = await response.json();
-        showNotification(successData.detail, 'success');
-    } catch (error) {
-        showNotification(`Error: ${error.message}`, 'error');
-    }
-}
-
-// --- FUNCIÓN DE AYUDA Y NOTIFICACIONES ---
 function populateSelect(elements, options, placeholder) {
-    // Permite pasar un solo select o un NodeList
-    if (!elements) return;
     const selectList = (elements instanceof NodeList || Array.isArray(elements)) ? elements : [elements];
     selectList.forEach(select => {
         if (!select) return;
@@ -480,6 +461,65 @@ function populateSelect(elements, options, placeholder) {
     });
 }
 
+// Función que organiza el llenado del formulario de finalización
+function populateFinalizeForm() {
+    const form = document.getElementById('finalize-season-form');
+    if (!form) return;
+    populateSelect(form.querySelectorAll('#res-campeon, .res-ucl, .res-el, #res-conference, .res-descenso'), equiposLaLiga, 'Selecciona un equipo');
+    const teamSelectors = form.querySelectorAll('.team-selector');
+    teamSelectors.forEach(teamSelector => {
+        populateSelect(teamSelector, equiposLaLiga, "Selecciona un equipo");
+        teamSelector.addEventListener('change', () => {
+            const selectedTeam = teamSelector.value;
+            const playerSelector = document.getElementById(teamSelector.dataset.playerTarget);
+            const filterType = teamSelector.dataset.filter;
+            let playersToShow = plantillasEquipos[selectedTeam] || [];
+            if (filterType === 'spanish') {
+                playersToShow = playersToShow.filter(player => player.nacionalidad === 'España');
+            } else if (filterType === 'goalkeeper') {
+                playersToShow = playersToShow.filter(player => player.posicion === 'POR');
+            }
+            populateSelect(playerSelector, playersToShow, "Selecciona un jugador");
+        });
+    });
+}
+
+async function handleFinalizeSeason(event) {
+    event.preventDefault();
+    if (!confirm("¿ESTÁS SEGURO? Esta acción calculará y sumará todos los puntos de temporada.")) return;
+    const resultData = {
+        Competicion: "LaLiga",
+        Campeon: document.getElementById('res-campeon').value,
+        Clasificados_UCL: Array.from(document.querySelectorAll('.res-ucl')).map(s => s.value),
+        Clasificados_EL: Array.from(document.querySelectorAll('.res-el')).map(s => s.value),
+        Clasificado_Conference: document.getElementById('res-conference').value,
+        Descensos: Array.from(document.querySelectorAll('.res-descenso')).map(s => s.value),
+        Pichichi: document.getElementById('res-pichichi').value,
+        Max_Asistente: document.getElementById('res-max-asistente').value,
+        Zamora: document.getElementById('res-zamora').value,
+        Zarra: document.getElementById('res-zarra').value,
+        MVP: document.getElementById('res-mvp').value
+    };
+    try {
+        const response = await fetch('/season-predictions/finalize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(resultData)
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail);
+        }
+        const successData = await response.json();
+        showNotification(successData.detail, 'success');
+    } catch (error) {
+        showNotification(`Error: ${error.message}`, 'error');
+    }
+}
+
+// =================================================================================
+// FUNCIÓN DE NOTIFICACIONES REUTILIZABLE
+// =================================================================================
 function showNotification(message, type = 'success') {
     const container = document.getElementById('notification-container');
     if (!container) return;
@@ -487,5 +527,37 @@ function showNotification(message, type = 'success') {
     container.className = 'notification';
     container.classList.add(type);
     container.classList.add('show');
-    setTimeout(() => { container.classList.remove('show'); }, 3000);
+    setTimeout(() => {
+        container.classList.remove('show');
+    }, 3000);
+}
+
+async function handleAdjustPoints(event) {
+    const button = event.target;
+    const predictionId = button.dataset.predictionId;
+    const currentPoints = button.dataset.currentPoints;
+
+    const newPointsStr = prompt(`Introduce la NUEVA puntuación TOTAL para esta predicción (la actual es ${currentPoints}):`);
+    if (newPointsStr === null) return; // El usuario canceló
+
+    const newPoints = parseInt(newPointsStr);
+    if (isNaN(newPoints) || newPoints < 0) {
+        showNotification("Debes introducir un número válido y positivo.", "error");
+        return;
+    }
+
+    const response = await fetch(`/predictions/${predictionId}/adjust-points`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ puntos_obtenidos: newPoints })
+    });
+
+    if (response.ok) {
+        showNotification('Puntos actualizados correctamente.', 'success');
+        // Forzamos la recarga de las listas para ver el cambio reflejado en todas partes
+        cargarListasDePartidos();
+        cargarUsuarios();
+    } else {
+        showNotification('Error al actualizar los puntos.', 'error');
+    }
 }
