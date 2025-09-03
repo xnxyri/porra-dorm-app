@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicciones Champions - Porra DORM</title>
+    <script src="/static/data.js" defer></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="notification-container"></div>
+    <header>
+        <div class="header-left">
+            <img src="https://media.api-sports.io/football/leagues/2.png" alt="Logo Champions" id="header-crest">
+            <h1>Predicciones Champions League</h1>
+        </div>
+        <a href="/" class="button-link">Volver a la Portada</a>
+    </header>
+    <main>
+        <section>
+            <form id="champions-prediction-form">
+                <div class="user-input-container">
+                    <input type="text" id="discord-username" placeholder="Tu nombre de usuario de Discord" required>
+                </div>
+                <h3>Predicciones Finales</h3>
+                <div class="form-row-stacked">
+                    <label for="campeon">🏆 Campeón</label>
+                    <select id="campeon" required></select>
+                </div>
+                <div class="form-row-stacked">
+                    <label>⚽ Pichichi (Máximo Goleador)</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="pichichi-player"></select>
+                        <select id="pichichi-player" name="pichichi" class="player-selector" required></select>
+                    </div>
+                </div>
+                <div class="form-row-stacked">
+                    <label>🎯 Máximo Asistente</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="max-asistente-player"></select>
+                        <select id="max-asistente-player" name="max-asistente" class="player-selector" required></select>
+                    </div>
+                </div>
+                <div class="form-row-stacked">
+                    <label>🌟 MVP del Torneo</label>
+                    <div class="player-selector-group">
+                        <select class="team-selector" data-player-target="mvp-player"></select>
+                        <select id="mvp-player" name="mvp" class="player-selector" required></select>
+                    </div>
+                </div>
+                <button type="submit">Enviar Predicciones de Champions</button>
+            </form>
+        </section>
+    </main>
+    <script src="/static/champions.js" defer></script>
+</body>
+</html>

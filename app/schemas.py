@@ -132,3 +132,22 @@ class ResultadoTemporada(BaseModel):
     Zamora: str
     Zarra: str
     MVP: str | None = None
+
+# --- ESQUEMAS PARA PREDICCIONES DE CHAMPIONS ---
+class PrediccionChampionsBase(BaseModel):
+    Competicion: str = "Champions League"
+    Campeon: str
+    Pichichi: str
+    Max_Asistente: str
+    MVP: str
+
+class PrediccionChampionsCreate(PrediccionChampionsBase):
+    Nombre_Usuario_Discord: str
+
+# Reutilizamos el esquema de ResultadoTemporada pero lo usaremos para Champions
+class ResultadoChampions(BaseModel):
+    Competicion: str
+    Campeon: str
+    Pichichi: str
+    Max_Asistente: str
+    MVP: str

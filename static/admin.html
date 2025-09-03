@@ -87,7 +87,6 @@
                 <div id="upcoming-matches-container">
                     </div>
 
-                    </div>
             <div class="admin-column">
                 <h2>Historial de Partidos Finalizados</h2>
                 <div id="finished-matches-container">
@@ -171,6 +170,38 @@
 
             <button type="submit">Calcular y Repartir Puntos Finales</button>
         </form>
+        <hr style="margin: 40px 0;">
+
+        <h2>Finalizar Champions League</h2>
+        <a href="/gestion-champions" class="button-link" style="text-decoration:none;">Gestionar Champions</a>
+        <form id="finalize-champions-form">
+            <div class="form-row-stacked">
+                <label>🏆 Campeón</label>
+                <select id="res-champions-campeon" required></select>
+            </div>
+            <div class="form-row-stacked">
+                <label>⚽ Pichichi (Máximo Goleador)</label>
+                <div class="player-selector-group">
+                    <select class="team-selector-champions" data-player-target="res-champions-pichichi"></select>
+                    <select id="res-champions-pichichi" name="pichichi" class="player-selector" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🎯 Máximo Asistente</label>
+                <div class="player-selector-group">
+                    <select class="team-selector-champions" data-player-target="res-champions-max-asistente"></select>
+                    <select id="res-champions-max-asistente" name="max-asistente" class="player-selector" required></select>
+                </div>
+            </div>
+            <div class="form-row-stacked">
+                <label>🌟 MVP del Torneo</label>
+                <div class="player-selector-group">
+                    <select class="team-selector-champions" data-player-target="res-champions-mvp"></select>
+                    <select id="res-champions-mvp" name="mvp" class="player-selector" required></select>
+                </div>
+            </div>
+            <button type="submit">Calcular Puntos de Champions</button>
+         </form>
     </div>
         </section>
     </main>

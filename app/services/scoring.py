@@ -162,3 +162,41 @@ def calcular_puntos_temporada(prediccion: models.PrediccionTemporada, resultados
         puntos += 75
 
     return puntos
+
+# --- FUNCIÓN PARA CALCULAR PUNTOS DE CHAMPIONS (VERSIÓN ULTRA-SEGURA) ---
+def calcular_puntos_champions(prediccion: models.PrediccionTemporada, resultados: schemas.ResultadoChampions):
+    puntos = 0
+    
+    try:
+        # Normalizamos los valores de la predicción, manejando el caso de que sean None
+        pred_campeon = prediccion.Campeon.lower().strip() if prediccion.Campeon else ""
+        pred_pichichi = prediccion.Pichichi.lower().strip() if prediccion.Pichichi else ""
+        pred_asistente = prediccion.Max_Asistente.lower().strip() if prediccion.Max_Asistente else ""
+        pred_mvp = prediccion.MVP.lower().strip() if prediccion.MVP else ""
+
+        # Normalizamos los valores de los resultados, manejando el caso de que sean None
+        res_campeon = resultados.Campeon.lower().strip() if resultados.Campeon else ""
+        res_pichichi = resultados.Pichichi.lower().strip() if resultados.Pichichi else ""
+        res_asistente = resultados.Max_Asistente.lower().strip() if resultados.Max_Asistente else ""
+        res_mvp = resultados.MVP.lower().strip() if resultados.MVP else ""
+
+        # Comparamos solo si los valores no están vacíos
+        if pred_campeon and pred_campeon == res_campeon:
+            puntos += 250
+        
+        if pred_pichichi and pred_pichichi == res_pichichi:
+            puntos += 75
+
+        if pred_asistente and pred_asistente == res_asistente:
+            puntos += 75
+
+        if pred_mvp and pred_mvp == res_mvp:
+            puntos += 75
+
+    except Exception as e:
+        # Si algo inesperado ocurre, lo imprimimos en la consola del servidor para depurar
+        # y devolvemos 0 para no crashear.
+        print(f"ERROR INESPERADO en scoring.calcular_puntos_champions: {e}")
+        return 0
+
+    return puntos

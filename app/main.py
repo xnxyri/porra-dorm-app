@@ -47,6 +47,14 @@ async def read_season_management_page():
 async def read_admin_page():
     return FileResponse('static/admin.html')
 
+@app.get("/champions", response_class=FileResponse)
+async def read_champions_page():
+    return FileResponse('static/champions.html')
+
+@app.get("/gestion-champions", response_class=FileResponse)
+async def read_champions_management_page():
+    return FileResponse('static/gestion-champions.html')
+
 # ========================================================================
 # RUTAS DE LA API (los "routers")
 # ========================================================================

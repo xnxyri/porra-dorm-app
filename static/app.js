@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Activa el asesor "Factous" de forma intermitente
     if(document.getElementById('factous-popup')) {
-        setInterval(showRandomFactou, 25000);
+        setInterval(showRandomFactou, 20000);
     }
 });
 

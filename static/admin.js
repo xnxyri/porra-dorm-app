@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const editPredictionForm = document.getElementById('edit-prediction-form');
     if (editPredictionForm) editPredictionForm.addEventListener('submit', handleUpdatePrediction);
+
+    const finalizeChampionsForm = document.getElementById('finalize-champions-form');
+    if (finalizeChampionsForm) finalizeChampionsForm.addEventListener('submit', handleFinalizeChampions);
 });
 
 // =================================================================================
@@ -39,6 +42,7 @@ async function handleLogin(event) {
             cargarMemesAdmin();
             cargarPartidosPorJugar();
             populateFinalizeForm();
+            populateChampionsFinalizeForm();
         } else {
             showNotification("Error: Contraseña incorrecta", 'error');
         }
@@ -501,7 +505,7 @@ async function handleFinalizeSeason(event) {
         MVP: document.getElementById('res-mvp').value
     };
     try {
-        const response = await fetch('/season-predictions/finalize', {
+        const response = await fetch('/season-predictions/liga/finalize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(resultData)
@@ -515,6 +519,83 @@ async function handleFinalizeSeason(event) {
     } catch (error) {
         showNotification(`Error: ${error.message}`, 'error');
     }
+}
+
+// =================================================================================
+// SECCIÓN DE FINALIZACIÓN DE CHAMPIONS LEAGUE
+// =================================================================================
+
+function populateChampionsFinalizeForm() {
+    const form = document.getElementById('finalize-champions-form');
+    if (!form) return;
+
+    // Rellena el desplegable de campeón
+    populateSelect(form.querySelector('#res-champions-campeon'), equiposChampions, 'Selecciona Campeón');
+
+    // Activa la lógica de filtrado para los jugadores
+    const teamSelectors = form.querySelectorAll('.team-selector-champions');
+    teamSelectors.forEach(teamSelector => {
+        populateSelect(teamSelector, equiposChampions, "Selecciona un equipo");
+
+        teamSelector.addEventListener('change', () => {
+            const selectedTeam = teamSelector.value;
+            const playerSelector = document.getElementById(teamSelector.dataset.playerTarget);
+            
+            // Usamos la base de datos de plantillas de Champions
+            let playersToShow = plantillasChampions[selectedTeam] || [];
+
+            populateSelect(playerSelector, playersToShow, "Selecciona un jugador");
+        });
+    });
+}
+
+async function handleFinalizeChampions(event) {
+    event.preventDefault();
+    if (!confirm("¿ESTÁS SEGURO? Esta acción calculará y sumará todos los puntos de la Champions.")) return;
+
+    const resultData = {
+        Competicion: "Champions League",
+        Campeon: document.getElementById('res-champions-campeon').value,
+        Pichichi: document.getElementById('res-champions-pichichi').value,
+        Max_Asistente: document.getElementById('res-champions-max-asistente').value,
+        MVP: document.getElementById('res-champions-mvp').value
+    };
+
+    try {
+        const response = await fetch('/season-predictions/champions/finalize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(resultData)
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail);
+        }
+        const successData = await response.json();
+        showNotification(successData.detail, 'success');
+    } catch (error) {
+        showNotification(`Error: ${error.message}`, 'error');
+    }
+}
+
+// --- FUNCIÓN DE AYUDA (ASEGÚRATE DE QUE ESTÁ EN TU ARCHIVO) ---
+function populateSelect(element, options, placeholder) {
+    const selectList = (element instanceof NodeList || Array.isArray(element)) ? element : [element];
+    selectList.forEach(select => {
+        if (!select) return;
+        select.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+        options.forEach(optionItem => {
+            const option = document.createElement('option');
+            if (typeof optionItem === 'object' && optionItem !== null) {
+                option.value = optionItem.nombre;
+                option.textContent = optionItem.nombre;
+            } else {
+                option.value = optionItem;
+                option.textContent = optionItem;
+            }
+            select.appendChild(option);
+        });
+    });
 }
 
 // =================================================================================
